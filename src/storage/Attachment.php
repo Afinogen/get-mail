@@ -1,6 +1,6 @@
 <?php
 
-namespace storage;
+namespace afinogen89\getmail\storage;
 
 /**
  * Class Attachment

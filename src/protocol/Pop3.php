@@ -1,6 +1,6 @@
 <?php
 
-namespace protocol;
+namespace afinogen89\getmail\protocol;
 
 /**
  * Class Pop3

@@ -1,7 +1,7 @@
 <?php
 namespace storage;
 
-use protocol;
+use afinogen89\getmail\protocol;
 
 /**
  * Class Pop3
