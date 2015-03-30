@@ -2,7 +2,7 @@ Get Mail from POP3
 ==================
 
 Класс для получение писем с почтового сервера по протоколу pop3  
-Часть работы с протоколом было ведренута из zf2, остальное самописное.
+Часть работы с протоколом было выдернута из zf2, остальное самописное.
 
 Установка
 ------------
@@ -10,7 +10,7 @@ Get Mail from POP3
 Установка происходит через composer
 
 ```
-php composer.phar require --prefer-dist afinogen89/get-mail "*"
+php composer.phar require --prefer-dist afinogen89/get-mail "dev-master"
 ```
 
 или добавлением
@@ -61,7 +61,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist afinogen89/get-mail "*"
+php composer.phar require --prefer-dist afinogen89/get-mail "dev-master"
 ```
 
 or add
