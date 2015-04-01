@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "afinogen89\\getMail\\": ""
+            "afinogen89\\getMail\\": "src/"
         }
     }
 }
