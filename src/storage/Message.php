@@ -92,25 +92,33 @@ class Message
      */
     protected function parserContent()
     {
-        $parts = preg_split('#--'.$this->_header->getMessageBoundary().'(--)?\s*#si', $this->_content, -1,PREG_SPLIT_NO_EMPTY);
+        if ($this->_header->getMessageBoundary()) {
+            $parts = preg_split('#--' . $this->_header->getMessageBoundary() . '(--)?\s*#si', $this->_content, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($parts as $part) {
+                $part = trim($part);
+                if (empty($part)) {
+                    continue;
+                }
 
-        foreach($parts as $part) {
-            $part = trim($part);
-            if (empty($part)) {
-                continue;
-            }
+                if (preg_match('/(Content-Type:)(.*)/', $part, $math)) {
+                    $data = explode(';', $math[2]);
+                    $type = trim($data[0]);
 
-            if (preg_match('/(Content-Type:)(.*)/', $part, $math)) {
-                $data = explode(';', $math[2]);
-                $type = trim($data[0]);
-
-                //get body message
-                if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN) {
-                    $this->parserBodyMessage($part);
-                } else { //attachment
-                    $this->parserAttachment($part);
+                    //get body message
+                    if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN) {
+                        $this->parserBodyMessage($part);
+                    } else { //attachment
+                        $this->parserAttachment($part);
+                    }
                 }
             }
+        } else {
+            $content = new Content();
+            $content->content = $this->_content;
+            $content->charset = $this->_header->getCharset();
+            $content->transferEncoding = $this->_header->getTransferEncoding();
+
+            $this->_parts[] = $content;
         }
     }
 
@@ -123,7 +131,9 @@ class Message
         preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/si', $part, $boundary);
 
         $contentType = $contentType[1];
-        $boundary = trim($boundary[1]);
+        if (isset($boundary[1])) {
+            $boundary = trim($boundary[1]);
+        }
 
         $dataContent = self::splitContent($part);
 

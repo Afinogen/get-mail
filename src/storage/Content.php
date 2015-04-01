@@ -45,9 +45,14 @@ class Content
         $content = '';
         if ($this->transferEncoding == 'base64') {
             $content = base64_decode($this->content);
-            if ($this->charset && strtolower($this->charset) != 'utf-8') {
-                $content = mb_convert_encoding($content, 'UTF-8', $this->charset);
-            }
+        } else if ($this->transferEncoding == 'quoted-printable'){
+            $content = quoted_printable_decode($this->content);
+        } else {
+            $content = $this->content;
+        }
+
+        if ($this->charset && strtolower($this->charset) != 'utf-8') {
+            $content = mb_convert_encoding($content, 'UTF-8', $this->charset);
         }
 
         return $content;

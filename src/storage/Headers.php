@@ -22,9 +22,13 @@ class Headers
     /** @var  string */
     private $_messageContentType;
     /** @var  string */
-    private $_messageBoundary;
+    private $_boundary;
     /** @var  string */
     private $_date;
+    /** @var  string */
+    private $_charset;
+    /** @var  string */
+    private $_transferEncoding;
 
     /**
      * @param string $headers
@@ -45,9 +49,20 @@ class Headers
         $this->_to = self::decodeMimeString(current($headers['to']));
         $this->_from = self::decodeMimeString(current($headers['from']));
         $this->_subject = self::decodeMimeString(current($headers['subject']));
-        $data = explode(';', current($headers['content-type']));
-        $this->_messageContentType = trim($data[0]);
-        $this->_messageBoundary = trim(explode('=', $data[1])[1],'"');
+
+        $part = current($headers['content-type']);
+        $this->_messageContentType = trim(explode(';', $part)[0]);
+
+        if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/]+)/si', $part, $result))
+        {
+            foreach($result[1] as $key=>$val) {
+                $val = '_'.$val;
+                $this->{$val} = $result[2][$key];
+            }
+        }
+        if (isset($headers['content-transfer-encoding'])) {
+            $this->_transferEncoding = trim(current($headers['content-transfer-encoding']));
+        }
     }
 
     /**
@@ -113,7 +128,7 @@ class Headers
      */
     public function getMessageBoundary()
     {
-        return $this->_messageBoundary;
+        return $this->_boundary;
     }
 
     /**
@@ -133,6 +148,22 @@ class Headers
     }
 
     /**
+     * @return string
+     */
+    public function getCharset()
+    {
+        return $this->_charset;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTransferEncoding()
+    {
+        return $this->_transferEncoding;
+    }
+
+    /**
      * @return array
      */
     public function asArray()
@@ -146,12 +177,12 @@ class Headers
      */
     public static function toArray($headers)
     {
-        preg_match_all('#[\r\n]*([\w-]+\:)\s*(.+?)\s*(?=([\r\n]+[\w-]+\:|[\r\n]{3,}|\n{2,}))#si',$headers,$result);
+        preg_match_all('#[\r\n]*([\w-]+\:)(.+?)(?=([\r\n]+[\w-]+\:|[\r\n]{3,}|\n{2,}))#si',$headers,$result);
 
         $headers = [];
         foreach ($result[1] as $k => $header) {
             $header = strtolower(rtrim($header , ':'));
-            $headers[$header][] = $result[2][$k];
+            $headers[$header][] = trim($result[2][$k]);
         }
 
         return $headers;
