@@ -45,15 +45,13 @@ class Headers
     protected function parserHeaders()
     {
         $headers = $this->asArray();
-
-        $this->_to = self::decodeMimeString(current($headers['to']));
-        $this->_from = self::decodeMimeString(current($headers['from']));
-        $this->_subject = self::decodeMimeString(current($headers['subject']));
+        $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
+        $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
+        $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
-
-        if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/]+)/si', $part, $result))
+        if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/\=]+)/i', $part, $result))
         {
             foreach($result[1] as $key=>$val) {
                 $val = '_'.$val;
@@ -79,16 +77,19 @@ class Headers
             if (!empty($data)) {
                 array_shift($data);
                 $encode = array_shift($data);
-                if (array_shift($data) == 'B') {
+                $type = array_shift($data);
+                if ($type == 'B') {
                     $str = base64_decode(array_shift($data));
                     $str = mb_convert_encoding($str, 'UTF-8', $encode);
                     $str = $str . ltrim($data[0], '=');
+                } elseif ($type == 'Q') {
+                    $str = quoted_printable_decode(array_shift($data));
                 }
             }
             $result .= $str;
         }
 
-        return $result ? $result : $strMime;
+        return $result ?: $strMime;
     }
 
     /**
@@ -177,6 +178,7 @@ class Headers
      */
     public static function toArray($headers)
     {
+        $headers .= "\r\n\r\n";
         preg_match_all('#[\r\n]*([\w-]+\:)(.+?)(?=([\r\n]+[\w-]+\:|[\r\n]{3,}|\n{2,}))#si',$headers,$result);
 
         $headers = [];
