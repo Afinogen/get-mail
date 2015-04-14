@@ -92,23 +92,76 @@ class Message
      */
     protected function parserContent()
     {
-        if ($this->_header->getMessageBoundary()) {
-            $parts = preg_split('#--' . $this->_header->getMessageBoundary() . '(--)?\s*#si', $this->_content, -1, PREG_SPLIT_NO_EMPTY);
+        $this->newParser($this->_header->getMessageBoundary(), $this->_content);
+//        if ($this->_header->getMessageBoundary()) {
+//            $parts = preg_split('#--' . $this->_header->getMessageBoundary() . '(--)?\s*#si', $this->_content, -1, PREG_SPLIT_NO_EMPTY);
+//            foreach ($parts as $part) {
+//                $part = trim($part);
+//                if (empty($part)) {
+//                    continue;
+//                }
+//
+//                if (preg_match('/(Content-Type:)(.*)/', $part, $math)) {
+//                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $boundary))
+//                    {
+//                        $subParts = preg_split('#--' . $boundary[1] . '(--)?\s*#si', $part, -1, PREG_SPLIT_NO_EMPTY);
+//                        foreach($subParts as $p) {
+//                            var_dump($p);exit;
+//                        }
+//                    } else {
+//                        $data = explode(';', $math[2]);
+//                        $type = trim($data[0]);
+//
+//                        //get body message
+//                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN) {
+//                            $this->parserBodyMessage($part);
+//                        } else { //attachment
+//                            $this->parserAttachment($part);
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            $content = new Content();
+//            $content->content = $this->_content;
+//            $content->charset = $this->_header->getCharset();
+//            $content->transferEncoding = $this->_header->getTransferEncoding();
+//
+//            $this->_parts[] = $content;
+//        }
+    }
+
+    private function newParser($boundary, $content)
+    {
+        if ($boundary) {
+            $parts = preg_split('#--' . $boundary . '(--)?\s*#si', $content, -1, PREG_SPLIT_NO_EMPTY);
             foreach ($parts as $part) {
                 $part = trim($part);
                 if (empty($part)) {
                     continue;
                 }
 
-                if (preg_match('/(Content-Type:)(.*)/', $part, $math)) {
-                    $data = explode(';', $math[2]);
-                    $type = trim($data[0]);
+                if (preg_match('/(Content-Type:)(.*)/i', $part, $math)) {
+                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary))
+                    {
+                        if ($subBoundary[1] != $boundary) {
+                            $this->newParser($subBoundary[1], $part);
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        $data = explode(';', $math[2]);
+                        $type = trim($data[0]);
 
-                    //get body message
-                    if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN) {
-                        $this->parserBodyMessage($part);
-                    } else { //attachment
-                        $this->parserAttachment($part);
+                        //get body message
+                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN || $type == Content::CT_MESSAGE_DELIVERY) {
+                            $this->parserBodyMessage($part);
+                        } elseif ($type == Content::CT_MESSAGE_RFC822) {
+                            $this->parserBodyMessage($part);
+                            $this->parserAttachment($part);
+                        } else { //attachment
+                            $this->parserAttachment($part);
+                        }
                     }
                 }
             }
@@ -139,7 +192,7 @@ class Message
 
         $content = new Content();
         $content->contentType = $contentType;
-        $content->boundary = $boundary ? $boundary : $this->_header->getMessageBoundary();
+        $content->boundary = $boundary ?: $this->_header->getMessageBoundary();
         $content->content = $dataContent['content'];
 
         if ($content->contentType == Content::CT_TEXT_HTML || $content->contentType == Content::CT_TEXT_PLAIN) {
@@ -183,14 +236,15 @@ class Message
     {
         $part = self::splitContent($part);
         $attachment = new Attachment();
-        $headers = Headers::toArray($part['header']."\r\n\r\n");
+        $headers = Headers::toArray($part['header']."\r\n");
 
         if (isset($headers['content-type'])) {
             $data = explode(';', current($headers['content-type']));
 
             $attachment->contentType = trim($data[0]);
 
-            $name = trim(substr($data[1], 6), '"');
+            //если нет имени - текущее время
+            $name = isset($data[1]) ? trim(substr($data[1], 6), '"') : time();
             $tmp = Headers::decodeMimeString($name);
 
             if (!empty($tmp)) {

@@ -127,7 +127,7 @@ class File
     {
         if ($this->_mails && isset($this->_mails[$id])) {
             $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
-            $data = explode("\r\n\r\n", $data);
+            $data = explode("\r\n\n", $data); //\r\n\r\n
             return $data[0];
         } else {
             return null;

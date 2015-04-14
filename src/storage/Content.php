@@ -11,6 +11,8 @@ class Content
     const CT_MULTIPART_ALTERNATIVE = 'multipart/alternative';
     const CT_TEXT_PLAIN = 'text/plain';
     const CT_TEXT_HTML = 'text/html';
+    const CT_MESSAGE_DELIVERY = 'message/delivery-status';
+    const CT_MESSAGE_RFC822 = 'message/rfc822';
 
     /**
      * @var string
