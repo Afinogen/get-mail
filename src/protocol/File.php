@@ -20,7 +20,7 @@ class File
     public function __construct($path)
     {
         if (is_dir($path)) {
-            $this->_path = $path;
+            $this->_path = rtrim($path, '/');
             $this->readDir();
         }
     }
