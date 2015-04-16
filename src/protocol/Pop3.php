@@ -150,7 +150,7 @@ class Pop3
         }
 
         if ($status != '+OK') {
-            throw new \RuntimeException('last request failed');
+            throw new \RuntimeException($result);
         }
 
         if ($multiline) {

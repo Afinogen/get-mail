@@ -10,7 +10,7 @@
 require('../vendor/autoload.php');
 
 
-$storage = new \afinogen89\getmail\storage\File('/home/afinogen/dumps/email/');
+$storage = new \afinogen89\getmail\storage\File('../email/');
 
 /// Вывод одного письма
 //$msg = $storage->getMessage(658);
