@@ -4,6 +4,10 @@ namespace afinogen89\getmail\storage;
 
 use afinogen89\getmail\protocol;
 
+/**
+ * Class File
+ * @package afinogen89\getmail\storage
+ */
 class File
 {
     /** @var  protocol\File */
@@ -15,6 +19,7 @@ class File
     }
 
     /**
+     * Получение количества сообщений
      * @return int
      */
     public function countMessage()

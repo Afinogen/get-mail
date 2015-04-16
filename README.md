@@ -37,6 +37,8 @@ $pop3->logout();
 
 Работа с письмами:
 
+Протокол POP3
+
 ```php
 $storage = new storage\Pop3(['host' => 'example.ru', 'user' => 'data@example.ru', 'password' => '123456']);
 $msg = $storage->getMessage(1);
@@ -51,6 +53,15 @@ foreach($msg->getAttachment() as $t) {
     $t->saveToFile('/tmp/' . $t->filename);
 }
 ```
+
+Через папку с письмами (расширение файлов eml)
+```php
+$storage = new storage\File('../email/');
+$msg = $storage->getMessage(1);
+$msg->saveToFile('/tmp/1.eml');
+echo $msg->getHeader()->getSubject();
+```
+
 
 English version
 -----------

@@ -43,7 +43,7 @@ class Message
         $this->_header = new Headers($header);
         $this->_content = mb_substr($message, strlen($header), strlen($message));
         $this->_originMessage = $message;
-        $this->parserContent();
+        $this->parserContent($this->_header->getMessageBoundary(), $this->_content);
     }
 
     /**
@@ -88,50 +88,11 @@ class Message
     }
 
     /**
-     * Parser Content
+     * Разбор тела сообщения
+     * @param string $boundary
+     * @param string $content
      */
-    protected function parserContent()
-    {
-        $this->newParser($this->_header->getMessageBoundary(), $this->_content);
-//        if ($this->_header->getMessageBoundary()) {
-//            $parts = preg_split('#--' . $this->_header->getMessageBoundary() . '(--)?\s*#si', $this->_content, -1, PREG_SPLIT_NO_EMPTY);
-//            foreach ($parts as $part) {
-//                $part = trim($part);
-//                if (empty($part)) {
-//                    continue;
-//                }
-//
-//                if (preg_match('/(Content-Type:)(.*)/', $part, $math)) {
-//                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $boundary))
-//                    {
-//                        $subParts = preg_split('#--' . $boundary[1] . '(--)?\s*#si', $part, -1, PREG_SPLIT_NO_EMPTY);
-//                        foreach($subParts as $p) {
-//                            var_dump($p);exit;
-//                        }
-//                    } else {
-//                        $data = explode(';', $math[2]);
-//                        $type = trim($data[0]);
-//
-//                        //get body message
-//                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN) {
-//                            $this->parserBodyMessage($part);
-//                        } else { //attachment
-//                            $this->parserAttachment($part);
-//                        }
-//                    }
-//                }
-//            }
-//        } else {
-//            $content = new Content();
-//            $content->content = $this->_content;
-//            $content->charset = $this->_header->getCharset();
-//            $content->transferEncoding = $this->_header->getTransferEncoding();
-//
-//            $this->_parts[] = $content;
-//        }
-    }
-
-    private function newParser($boundary, $content)
+    protected function parserContent($boundary, $content)
     {
         if ($boundary) {
             $parts = preg_split('#--' . $boundary . '(--)?\s*#si', $content, -1, PREG_SPLIT_NO_EMPTY);
@@ -145,7 +106,7 @@ class Message
                     if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary))
                     {
                         if ($subBoundary[1] != $boundary) {
-                            $this->newParser($subBoundary[1], $part);
+                            $this->parserContent($subBoundary[1], $part);
                         } else {
                             continue;
                         }
