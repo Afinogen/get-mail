@@ -1,0 +1,21 @@
+{
+    "name": "afinogen89/get-mail",
+    "description": "Get Mail from POP3",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"," get mail"," pop3"],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Sergej Pozdnyakov",
+            "email": "afinogen89@gmail.com"
+        }
+    ],
+    "require": {
+      "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "afinogen89\\getmail\\": "src/"
+        }
+    }
+}
