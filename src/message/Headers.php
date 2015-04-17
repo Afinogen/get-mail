@@ -1,6 +1,6 @@
 <?php
 
-namespace afinogen89\getmail\storage;
+namespace afinogen89\getmail\message;
 
 /**
  * Class Headers
