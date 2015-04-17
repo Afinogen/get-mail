@@ -9,7 +9,7 @@
 // Composer
 require('../vendor/autoload.php');
 
-$storage = new \afinogen89\getmail\storage\Pop3(['host' => 'test.ru', 'user' => 'data@test.ru', 'password' => 'test']);
+$storage = new \afinogen89\getmail\storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => 'pass', 'ssl' => 'SSL']);
 
 echo $storage->countMessages().PHP_EOL;
 

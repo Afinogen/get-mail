@@ -62,6 +62,13 @@ $msg->saveToFile('/tmp/1.eml');
 echo $msg->getHeader()->getSubject();
 ```
 
+Пример подключения к gmail
+```php
+$storage = new storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => 'pass', 'ssl' => 'SSL']);
+```
+
+Для генерации пароля необходимо создать приложение на странице https://security.google.com/settings/security/apppasswords
+
 
 English version
 -----------

@@ -2,6 +2,7 @@
 
 namespace afinogen89\getmail\storage;
 
+use afinogen89\getmail\message\Message;
 use afinogen89\getmail\protocol;
 
 /**
