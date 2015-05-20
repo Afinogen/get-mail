@@ -18,4 +18,4 @@ $msg = $storage->getMessage(1);
 
 echo $msg->getMsgBody();
 echo PHP_EOL.PHP_EOL;
-echo $msg->getMsgAlternativeBody()->getContentDecode();
+echo $msg->getMsgAlternativeBody();
