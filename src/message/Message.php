@@ -33,6 +33,9 @@ class Message
      */
     private $_attachments = [];
 
+    /** @var  string */
+    private $_contentType;
+
     /**
      * @param string $message
      * @param null|int $id
@@ -66,7 +69,7 @@ class Message
     /**
      * @return Headers
      */
-    public function getHeader()
+    public function getHeaders()
     {
         return $this->_header;
     }
@@ -82,9 +85,48 @@ class Message
     /**
      * @return Attachment[]
      */
-    public function getAttachment()
+    public function getAttachments()
     {
         return $this->_attachments;
+    }
+
+    /**
+     * @return Content|null
+     */
+    public function getMsgBody()
+    {
+        $body = null;
+
+        if (!empty($this->_parts)) {
+            if (count($this->_parts) > 1) {
+                foreach ($this->_parts as $part) {
+                    if ($part->contentType != Content::CT_TEXT_PLAIN && $this->_contentType == Content::CT_MULTIPART_ALTERNATIVE) {
+                        $body = $part;
+                        break;
+                    } else {
+                        $body = $part;
+                    }
+                }
+            } else {
+                $body = $this->_parts[0];
+            }
+        }
+        return $body;
+    }
+
+    /**
+     * @return Content|null
+     */
+    public function getMsgAlternativeBody()
+    {
+        if (!empty($this->_parts) && $this->_contentType == Content::CT_MULTIPART_ALTERNATIVE) {
+            foreach ($this->_parts as $part) {
+                if ($part->contentType == Content::CT_TEXT_PLAIN) {
+                    return $part;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -113,6 +155,7 @@ class Message
                     } else {
                         $data = explode(';', $math[2]);
                         $type = trim($data[0]);
+                        $this->_contentType = $type;
 
                         //get body message
                         if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN || $type == Content::CT_MESSAGE_DELIVERY) {

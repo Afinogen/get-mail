@@ -18,7 +18,7 @@ $msg = $storage->getMessage(1);
 
 $msg->saveToFile('1.eml');
 
-echo 'Count Files: '.count($msg->getAttachment());
+echo 'Count Files: '.count($msg->getAttachments());
 
 foreach ($msg->getParts() as $part) {
     echo  $part->getContentDecode().PHP_EOL;
