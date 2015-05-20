@@ -31,11 +31,11 @@ for($i=0; $i< $storage->countMessage(); $i++) {
 
     $msg = $storage->getMessage($i);
 
-    echo $msg->getHeader()->getSubject() . PHP_EOL;
+    echo $msg->getHeaders()->getSubject() . PHP_EOL;
 
     foreach ($msg->getParts() as $part) {
             echo $part->getContentDecode();
     }
 
-    echo 'Count Files: '.count($msg->getAttachment());
+    echo 'Count Files: '.count($msg->getAttachments());
 }

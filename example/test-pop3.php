@@ -9,17 +9,13 @@
 // Composer
 require('../vendor/autoload.php');
 
-$storage = new \afinogen89\getmail\storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => 'pass', 'ssl' => 'SSL']);
+$storage = new \afinogen89\getmail\storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => '123456', 'ssl' => 'SSL']);
 
 echo $storage->countMessages().PHP_EOL;
 
 // Вывод одного письма
 $msg = $storage->getMessage(1);
 
-$msg->saveToFile('1.eml');
-
-echo 'Count Files: '.count($msg->getAttachments());
-
-foreach ($msg->getParts() as $part) {
-    echo  $part->getContentDecode().PHP_EOL;
-}
+echo $msg->getMsgBody();
+echo PHP_EOL.PHP_EOL;
+echo $msg->getMsgAlternativeBody()->getContentDecode();

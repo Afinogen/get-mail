@@ -33,14 +33,11 @@ class Message
      */
     private $_attachments = [];
 
-    /** @var  string */
-    private $_contentType;
-
     /**
      * @param string $message
      * @param null|int $id
      */
-    public function __construct($header, $message,$id = null)
+    public function __construct($header, $message, $id = null)
     {
         $this->id = $id;
         $this->_header = new Headers($header);
@@ -91,6 +88,7 @@ class Message
     }
 
     /**
+     * Текст письма
      * @return Content|null
      */
     public function getMsgBody()
@@ -100,29 +98,30 @@ class Message
         if (!empty($this->_parts)) {
             if (count($this->_parts) > 1) {
                 foreach ($this->_parts as $part) {
-                    if ($part->contentType != Content::CT_TEXT_PLAIN && $this->_contentType == Content::CT_MULTIPART_ALTERNATIVE) {
-                        $body = $part;
+                    if ($part->contentType != Content::CT_TEXT_PLAIN && $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_ALTERNATIVE) {
+                        $body = $part->getContentDecode();
                         break;
                     } else {
-                        $body = $part;
+                        $body .= PHP_EOL.$part->getContentDecode();
                     }
                 }
             } else {
-                $body = $this->_parts[0];
+                $body = $this->_parts[0]->getContentDecode();
             }
         }
         return $body;
     }
 
     /**
+     * Альтернативный текст письма
      * @return Content|null
      */
     public function getMsgAlternativeBody()
     {
-        if (!empty($this->_parts) && $this->_contentType == Content::CT_MULTIPART_ALTERNATIVE) {
+        if (!empty($this->_parts) && $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_ALTERNATIVE) {
             foreach ($this->_parts as $part) {
                 if ($part->contentType == Content::CT_TEXT_PLAIN) {
-                    return $part;
+                    return $part->getContentDecode();
                 }
             }
         }
@@ -137,7 +136,7 @@ class Message
     protected function parserContent($boundary, $content)
     {
         if ($boundary) {
-            $parts = preg_split('#--' . $boundary . '(--)?\s*#si', $content, -1, PREG_SPLIT_NO_EMPTY);
+            $parts = preg_split('#--'.$boundary.'(--)?\s*#si', $content, -1, PREG_SPLIT_NO_EMPTY);
             foreach ($parts as $part) {
                 $part = trim($part);
                 if (empty($part)) {
@@ -145,8 +144,7 @@ class Message
                 }
 
                 if (preg_match('/(Content-Type:)(.*)/i', $part, $math)) {
-                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary))
-                    {
+                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary)) {
                         if ($subBoundary[1] != $boundary) {
                             $this->parserContent($subBoundary[1], $part);
                         } else {
@@ -155,7 +153,6 @@ class Message
                     } else {
                         $data = explode(';', $math[2]);
                         $type = trim($data[0]);
-                        $this->_contentType = $type;
 
                         //get body message
                         if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN || $type == Content::CT_MESSAGE_DELIVERY) {
@@ -202,7 +199,7 @@ class Message
         if ($content->contentType == Content::CT_TEXT_HTML || $content->contentType == Content::CT_TEXT_PLAIN) {
             $headers = Headers::toArray($dataContent['header']."\r\n\r\n");
             $data = explode(';', current($headers['content-type']));
-            $content->charset = trim(explode('=',$data[1])[1]);
+            $content->charset = trim(explode('=', $data[1])[1]);
             if (isset($headers['content-transfer-encoding'])) {
                 $content->transferEncoding = trim(current($headers['content-transfer-encoding']));
             }
@@ -211,9 +208,9 @@ class Message
         $this->_parts[] = $content;
 
         if ($content->contentType == Headers::MULTIPART_ALTERNATIVE) {
-            $subParts = preg_split('#--' . $content->boundary . '(--)?\s*#si', $part, -1, PREG_SPLIT_NO_EMPTY);
+            $subParts = preg_split('#--'.$content->boundary.'(--)?\s*#si', $part, -1, PREG_SPLIT_NO_EMPTY);
             array_shift($subParts);
-            foreach($subParts as $item) {
+            foreach ($subParts as $item) {
                 $item = self::splitContent(trim($item));
                 $subContent = new Content();
                 $subContent->boundary = $content->boundary;
@@ -222,7 +219,7 @@ class Message
                 $data = explode(';', current($headers['content-type']));
 
                 $subContent->contentType = trim($data[0]);
-                $subContent->charset = trim(explode('=',$data[1])[1]);
+                $subContent->charset = trim(explode('=', $data[1])[1]);
 
                 $subContent->transferEncoding = trim(current($headers['content-transfer-encoding']));
 
