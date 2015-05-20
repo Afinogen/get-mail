@@ -95,6 +95,14 @@ $storage = new \afinogen89\getmail\storage\Pop3(
 );
 ```
 
+Протокол imap
+Для получения доступа к функциям imap необходимо установить php5-imap
+```php
+$protocol = new \afinogen89\getmail\protocol\Imap('imap.gmail.com', 993);
+$protocol->login('test89@gmail.com', 'pass');
+$protocol->close();
+```
+
 English version
 -----------
 
