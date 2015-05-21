@@ -238,37 +238,40 @@ class Message
         $part = self::splitContent($part);
         $attachment = new Attachment();
         $headers = Headers::toArray($part['header']."\r\n");
+        $attachment->headers = $headers;
 
+        $name = '';
         if (isset($headers['content-type'])) {
             $data = explode(';', current($headers['content-type']));
 
             $attachment->contentType = trim($data[0]);
 
             //если нет имени - текущее время
-            $name = isset($data[1]) ? trim(substr($data[1], 6), '"') : time();
-            $tmp = Headers::decodeMimeString($name);
+            $name = isset($data[1]) ? preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si','$1',$data[1]) : time();
+            $name = Headers::decodeMimeString($name);
 
-            if (!empty($tmp)) {
-                $attachment->name = $tmp;
-            } else {
-                $attachment->name = $name;
-            }
+            $attachment->name = $name;
         }
 
         if (isset($headers['content-disposition'])) {
             $data = explode(';', current($headers['content-disposition']));
 
             $attachment->contentDisposition = trim($data[0]);
-            if (isset($data[1])) {
-                $name = trim(substr($data[1], 10), '"');
-                $tmp = Headers::decodeMimeString($name);
-                if (!empty($tmp)) {
-                    $attachment->filename = $tmp;
-                } else {
-                    $attachment->filename = $name;
+
+            $pattern = '#name(\*\d+\*)?\=(utf-8)?[\\\'\"]*([^\\\'";\s]+)#si';
+            $tmpName = $data;
+            unset($tmpName[0]);
+            $tmpName = implode($tmpName);
+            if(preg_match_all($pattern, $tmpName, $result)){
+                $name = [];
+                foreach($result[3] as $v){
+                    $name[] = $v;
                 }
-            } else {
-                $attachment->filename = $attachment->name;
+                $name = implode('', $name);
+                $name = urldecode($name);
+                $attachment->filename = $name;
+            }else{
+                $attachment->filename = $name;
             }
         }
 

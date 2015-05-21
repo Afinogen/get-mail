@@ -43,6 +43,9 @@ class Attachment
      */
     public $data;
 
+    /** @var  string */
+    public $headers;
+
     /**
      * @return string|null
      */

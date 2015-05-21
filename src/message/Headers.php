@@ -18,6 +18,8 @@ class Headers
     /** @var  string */
     private $_from;
     /** @var  string */
+    private $_cc;
+    /** @var  string */
     private $_subject;
     /** @var  string */
     private $_messageContentType;
@@ -46,6 +48,7 @@ class Headers
     {
         $headers = $this->asArray();
         $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
+        $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
         $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
 
@@ -114,6 +117,14 @@ class Headers
     public function getFrom()
     {
         return $this->_from;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCC()
+    {
+        return $this->_cc;
     }
 
     /**
