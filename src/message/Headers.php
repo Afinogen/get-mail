@@ -71,10 +71,11 @@ class Headers
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
+
         if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/\=]+)/i', $part, $result))
         {
             foreach($result[1] as $key=>$val) {
-                $val = '_'.$val;
+                $val = '_'.strtolower($val);
                 $this->{$val} = $result[2][$key];
             }
         }

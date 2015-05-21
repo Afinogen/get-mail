@@ -127,7 +127,7 @@ class File
     {
         if ($this->_mails && isset($this->_mails[$id])) {
             $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
-            preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $data), $subBoundary);
+            preg_match('/boundary\s*\=\s*["\']?([\w\=\-\/]+)/i', str_replace("\r\n\t", ' ', $data), $subBoundary);
             if (isset($subBoundary[1])) {
                 $data = preg_split('/'.$subBoundary[1].'[\r\n]/si', $data)[0];
             } else {

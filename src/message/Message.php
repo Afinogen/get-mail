@@ -144,7 +144,7 @@ class Message
                 }
 
                 if (preg_match('/(Content-Type:)(.*)/i', $part, $math)) {
-                    if (preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary)) {
+                    if (preg_match('/boundary\s*\=\s*["\']?([\w\=\-\/]+)/i', str_replace("\r\n\t", ' ', $part), $subBoundary)) {
                         if ($subBoundary[1] != $boundary) {
                             $this->parserContent($subBoundary[1], $part);
                         } else {
@@ -182,7 +182,7 @@ class Message
     protected function parserBodyMessage($part)
     {
         preg_match('/Content-Type\:\s*([\w\-\/]+)/si', $part, $contentType);
-        preg_match('/boundary\s*\=\s*["\']?([\w\-\/]+)/si', $part, $boundary);
+        preg_match('/boundary\s*\=\s*["\']?([\w\-\=\/]+)/si', $part, $boundary);
 
         $contentType = $contentType[1];
         if (isset($boundary[1])) {
