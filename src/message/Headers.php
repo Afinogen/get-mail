@@ -10,6 +10,7 @@ class Headers
 {
     const MULTIPART_MIXED = 'multipart/mixed';
     const MULTIPART_ALTERNATIVE = 'multipart/alternative';
+    const EMAIL_PATTERN = '#[\w\-\.\_]+@([\w\-]+\.)+[\w\-]+#si';
 
     /** @var  string */
     private $_headers;
@@ -17,6 +18,8 @@ class Headers
     private $_to;
     /** @var  string */
     private $_from;
+    /** @var  string */
+    private $_fromName;
     /** @var  string */
     private $_cc;
     /** @var  string */
@@ -51,6 +54,20 @@ class Headers
         $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
         $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
+
+        preg_match(self::EMAIL_PATTERN, $this->_from, $email);
+        if(!empty($email)){
+            $email= $email[0];
+        }else{
+            $email = null;
+            new \Exception('Email not found in "'.$this->_from.'"');
+        }
+
+        $this->_fromName = str_replace($email, '', $this->_from);
+        $this->_fromName = trim($this->_fromName, '<>,');
+        $this->_fromName = trim($this->_fromName);
+
+        $this->_from = $email;
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
@@ -117,6 +134,14 @@ class Headers
     public function getFrom()
     {
         return $this->_from;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFromName()
+    {
+        return $this->_fromName;
     }
 
     /**
