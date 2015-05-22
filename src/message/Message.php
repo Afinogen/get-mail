@@ -273,6 +273,7 @@ class Message
             }else{
                 $attachment->filename = $name;
             }
+            $attachment->filename = Headers::decodeMimeString($attachment->filename);
         }
 
         if (isset($headers['content-transfer-encoding'])) {
