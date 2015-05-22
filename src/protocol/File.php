@@ -15,6 +15,7 @@ class File
     private $_mails = [];
 
     /**
+     * Переменная $path может принимать путь либо к папке, либо к файлу
      * @param string $path
      */
     public function __construct($path)
@@ -22,6 +23,13 @@ class File
         if (is_dir($path)) {
             $this->_path = rtrim($path, '/');
             $this->readDir();
+        } else if (is_file($path)) {
+            $path_info = pathinfo($path);
+            if ($path_info['extension'] == 'eml') {
+                $this->_mails[] = ['is_deleted' => 0, 'file_name' => $path];
+            }
+        } else {
+            new \Exception('$path может быть либо папкой либо файлом');
         }
     }
 
@@ -120,6 +128,7 @@ class File
     }
 
     /**
+     * Получение заголовков письма
      * @param $id
      * @return null|string
      */
@@ -141,6 +150,7 @@ class File
     }
 
     /**
+     * Получение всего контента письма
      * @param $id
      * @return null|string
      */
