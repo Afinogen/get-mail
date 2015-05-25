@@ -268,12 +268,12 @@ class Message
                     $name[] = $v;
                 }
                 $name = implode('', $name);
+                $name = Headers::decodeMimeString($name);
                 $name = urldecode($name);
                 $attachment->filename = $name;
             }else{
-                $attachment->filename = $name;
+                $attachment->filename = Headers::decodeMimeString($name);
             }
-            $attachment->filename = Headers::decodeMimeString($attachment->filename);
         }
 
         if (isset($headers['content-transfer-encoding'])) {
