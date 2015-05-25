@@ -1,6 +1,7 @@
 <?php
 
 namespace afinogen89\getmail\protocol;
+use afinogen89\getmail\message\Headers;
 
 /**
  * Class File
@@ -136,9 +137,9 @@ class File
     {
         if ($this->_mails && isset($this->_mails[$id])) {
             $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
-            preg_match('/boundary\s*\=\s*["\']?([\w\=\-\/]+)/i', str_replace("\r\n\t", ' ', $data), $subBoundary);
+            preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', $data), $subBoundary);
             if (isset($subBoundary[1])) {
-                $data = preg_split('/'.$subBoundary[1].'[\r\n]/si', $data)[0];
+                $data = preg_split('/'.$subBoundary[1].'[\"\r\n]/si', $data)[0].$subBoundary[1].'"';
             } else {
                 $data = explode("\r\n\n", $data)[0]; //\r\n\r\n
             }

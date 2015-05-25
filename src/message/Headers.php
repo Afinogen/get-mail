@@ -11,6 +11,7 @@ class Headers
     const MULTIPART_MIXED = 'multipart/mixed';
     const MULTIPART_ALTERNATIVE = 'multipart/alternative';
     const EMAIL_PATTERN = '#[\w\-\.\_]+@([\w\-]+\.)+[\w\-]+#si';
+    const BOUNDARY_PATTERN = '/boundary\s*\=\s*["\']?([\w\=\:\-\/]+)/si';
 
     /** @var  string */
     private $_headers;
