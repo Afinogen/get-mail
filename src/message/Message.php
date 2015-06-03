@@ -258,15 +258,17 @@ class Message
 
             $attachment->contentDisposition = trim($data[0]);
 
-            $pattern = '#name(\*\d+\*)?\=(utf-8)?[\\\'\"]*([^\\\'";\s]+)#si';
+            $pattern = '#name(\*\d+\*)?\=(utf-8)?[\\\'\"]*([^\\\'";]+)#si';
             $tmpName = $data;
             unset($tmpName[0]);
             $tmpName = implode($tmpName);
+            $tmpName=preg_replace('#\s+#s',"\n\n",$tmpName);
             if(preg_match_all($pattern, $tmpName, $result)){
                 $name = [];
                 foreach($result[3] as $v){
                     $name[] = $v;
                 }
+
                 $name = implode('', $name);
                 $name = Headers::decodeMimeString($name);
                 $name = urldecode($name);
