@@ -102,10 +102,12 @@ class Headers
                 $type = array_shift($data);
                 if ($type == 'B') {
                     $str = base64_decode(array_shift($data));
-                    $str = mb_convert_encoding($str, 'UTF-8', $encode);
                     $str = $str . ltrim($data[0], '=');
                 } elseif ($type == 'Q') {
                     $str = quoted_printable_decode(array_shift($data));
+                }
+                if (!empty($encode)){
+                    $str = mb_convert_encoding($str, 'UTF-8', $encode);
                 }
             }
             $result .= $str;

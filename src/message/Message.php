@@ -255,12 +255,20 @@ class Message
 
         if (isset($headers['content-disposition'])) {
             $data = explode(';', current($headers['content-disposition']));
-
             $attachment->contentDisposition = trim($data[0]);
 
-            $pattern = '#name(\*\d+\*)?\=(utf-8)?[\\\'\"]*([^\\\'";]+)#si';
+            $pattern = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
             $tmpName = $data;
+
             unset($tmpName[0]);
+            foreach($tmpName as $key=>$val) {
+                if (preg_match('/[\w\-]{3,}\=/i', trim($val), $result) && stripos($result[0], 'name') ===false) {
+                    unset($tmpName[$key]);
+                } else {
+                    $tmpName[$key] = preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $val);
+                }
+            }
+
             $tmpName = implode($tmpName);
             $tmpName=preg_replace('#\s+#s',"\n\n",$tmpName);
             if(preg_match_all($pattern, $tmpName, $result)){
