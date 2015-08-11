@@ -141,7 +141,7 @@ class File
             if (isset($subBoundary[1])) {
                 $data = preg_split('/'.$subBoundary[1].'[\"\r\n]/si', $data)[0].$subBoundary[1].'"';
             } else {
-                $data = explode("\r\n\n", $data)[0]; //\r\n\r\n
+                $data = preg_split('/[\n\r]{3,}/s', $data)[0];
             }
 
             return $data;
