@@ -95,7 +95,14 @@ class Headers
     {
         $headers = $this->asArray();
         if (isset($headers['x-autoreply'], $headers['auto-submitted'])) {
-            if ($headers['auto-submitted']) {
+            //TODO проверить другие варианты
+            $replays = ['auto-replied'];
+
+            if (is_array($headers['auto-submitted'])) {
+                $headers['auto-submitted'] = current($headers['auto-submitted']);
+            }
+
+            if (in_array($headers['auto-submitted'], $replays)) {
                 $this->_isAutoReply = true;
             }
         }
