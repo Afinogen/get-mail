@@ -10,7 +10,7 @@
 require('../vendor/autoload.php');
 
 
-$storage = new \afinogen89\getmail\storage\File('../email/');
+$storage = new \afinogen89\getmail\storage\File('/home/afinogen/develop/get-mail/example/');
 
 /// Вывод одного письма
 //$msg = $storage->getMessage(658);
@@ -30,6 +30,8 @@ for($i=0; $i< $storage->countMessage(); $i++) {
     echo PHP_EOL.'---------------------------------------- '.$i.' ------------------------------------------------'.PHP_EOL;
 
     $msg = $storage->getMessage($i);
+    
+    var_dump($msg->getHeaders()->isAutoReply());
 
     echo $msg->getHeaders()->getSubject() . PHP_EOL;
 

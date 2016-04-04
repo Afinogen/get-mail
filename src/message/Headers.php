@@ -35,12 +35,15 @@ class Headers
     private $_charset;
     /** @var  string */
     private $_transferEncoding;
+    /** @var  bool */
+    private  $_isAutoReply;
 
     /**
      * @param string $headers
      */
     public function __construct($headers)
     {
+        $this->_isAutoReply = false;
         $this->_headers = $headers;
         $this->parserHeaders();
     }
@@ -80,8 +83,21 @@ class Headers
                 $this->{$val} = $result[2][$key];
             }
         }
+        
+        $this->parseAutoReply();
+        
         if (isset($headers['content-transfer-encoding'])) {
             $this->_transferEncoding = trim(current($headers['content-transfer-encoding']));
+        }
+    }
+
+    public function parseAutoReply()
+    {
+        $headers = $this->asArray();
+        if (isset($headers['x-autoreply'], $headers['auto-submitted'])) {
+            if ($headers['auto-submitted']) {
+                $this->_isAutoReply = true;
+            }
         }
     }
 
@@ -202,6 +218,14 @@ class Headers
     public function getTransferEncoding()
     {
         return $this->_transferEncoding;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAutoReply()
+    {
+        return $this->_isAutoReply;
     }
 
     /**
