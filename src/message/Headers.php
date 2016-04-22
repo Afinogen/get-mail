@@ -93,18 +93,20 @@ class Headers
 
     public function parseAutoReply()
     {
+        //TODO проверить другие варианты
+        $replays = ['auto-replied'];
+        
         $headers = $this->asArray();
+        if (is_array($headers['auto-submitted'])) {
+            $headers['auto-submitted'] = current($headers['auto-submitted']);
+        }
+
         if (isset($headers['x-autoreply'], $headers['auto-submitted'])) {
-            //TODO проверить другие варианты
-            $replays = ['auto-replied'];
-
-            if (is_array($headers['auto-submitted'])) {
-                $headers['auto-submitted'] = current($headers['auto-submitted']);
-            }
-
             if (in_array($headers['auto-submitted'], $replays)) {
                 $this->_isAutoReply = true;
             }
+        } elseif (isset($headers['auto-submitted']) && in_array($headers['auto-submitted'], $replays)) {
+            $this->_isAutoReply = true;
         }
     }
 
