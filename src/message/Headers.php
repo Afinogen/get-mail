@@ -97,7 +97,7 @@ class Headers
         $replays = ['auto-replied'];
         
         $headers = $this->asArray();
-        if (is_array($headers['auto-submitted'])) {
+        if (isset($headers['auto-submitted']) && is_array($headers['auto-submitted'])) {
             $headers['auto-submitted'] = current($headers['auto-submitted']);
         }
 
