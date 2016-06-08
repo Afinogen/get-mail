@@ -57,7 +57,6 @@ class Headers
         $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
         $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
-        $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
 
         preg_match(self::EMAIL_PATTERN, $this->_from, $email);
         if(!empty($email)){
@@ -83,6 +82,7 @@ class Headers
                 $this->{$val} = $result[2][$key];
             }
         }
+        $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject']), $this->getCharset()) : '';
         
         $this->parseAutoReply();
         
@@ -114,7 +114,7 @@ class Headers
      * @param string $strMime
      * @return string
      */
-    public static function decodeMimeString($strMime)
+    public static function decodeMimeString($strMime, $charset = null)
     {
         $items = preg_split('/[\r\n]{2,}/si', $strMime);
         $result = '';
@@ -125,19 +125,18 @@ class Headers
                 array_shift($data);
                 $encode = array_shift($data);
                 $type = array_shift($data);
-                if ($type == 'B') {
+                if ($type == 'B' || $type == 'b') {
                     $str = base64_decode(array_shift($data));
                     $str = $str . ltrim($data[0], '=');
-                } elseif ($type == 'Q') {
+                } elseif ($type == 'Q' || $type == 'q') {
                     $str = quoted_printable_decode(array_shift($data));
-                }
-                if (!empty($encode)){
-                    $str = mb_convert_encoding($str, 'UTF-8', $encode);
                 }
             }
             $result .= $str;
         }
-
+        if (!empty($charset)){
+            $strMime = mb_convert_encoding($strMime, 'UTF-8', $charset);
+        }
         return $result ?: $strMime;
     }
 
