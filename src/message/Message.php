@@ -256,24 +256,13 @@ class Message
         }
 
         if (isset($headers['content-disposition'])) {
-            $data = explode(';', current($headers['content-disposition']));
+            $contentDesposition = current($headers['content-disposition']);
+            $data = explode(';', $contentDesposition);
             $attachment->contentDisposition = trim($data[0]);
 
-            $pattern = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
-            $tmpName = $data;
+            $pattern = '#name\s*(\*\d+\*)?\s*=(utf-8|koi8-r)?\s*[\\\'\"]?([^\\\'";]+)#si';
 
-            unset($tmpName[0]);
-            foreach($tmpName as $key=>$val) {
-                if (preg_match('/[\w\-]{3,}\=/i', trim($val), $result) && stripos($result[0], 'name') ===false) {
-                    unset($tmpName[$key]);
-                } else {
-                    $tmpName[$key] = preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $val);
-                }
-            }
-
-            $tmpName = implode($tmpName);
-            $tmpName=preg_replace('#\s+#s',"\n\n",$tmpName);
-            if(preg_match_all($pattern, $tmpName, $result)){
+            if (preg_match_all($pattern, $contentDesposition, $result)) {
                 $name = [];
                 foreach($result[3] as $v){
                     $name[] = $v;
@@ -283,7 +272,7 @@ class Message
                 $name = Headers::decodeMimeString($name);
                 $name = urldecode($name);
                 $attachment->filename = $name;
-            }else{
+            } else {
                 $attachment->filename = Headers::decodeMimeString($name);
             }
         }
