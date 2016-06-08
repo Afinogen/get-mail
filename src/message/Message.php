@@ -249,7 +249,7 @@ class Message
             $attachment->contentType = trim($data[0]);
 
             //если нет имени - текущее время
-            $name = isset($data[1]) ? preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si','$1',$data[1]) : time();
+            $name = isset($data[1]) ? preg_replace('#.*name\s*\=\s*[\'"]?([^\'"]+).*#si','$1',$data[1]) : time();
             $name = Headers::decodeMimeString($name);
 
             $attachment->name = $name;
