@@ -131,6 +131,9 @@ class Headers
                 } elseif ($type == 'Q' || $type == 'q') {
                     $str = quoted_printable_decode(array_shift($data));
                 }
+                if (!empty($encode)){
+                    $str = mb_convert_encoding($str, 'UTF-8', $encode);
+                }
             }
             $result .= $str;
         }
