@@ -143,7 +143,9 @@ class Message
                     continue;
                 }
 
-                if (preg_match('/(Content-Type:)(.*)/i', $part, $math)) {
+                if (preg_match('/(Content-Disposition:)(.*)/i', $part, $math) && strstr($math[2], 'attachment')) {
+                    $this->parserAttachment($part);
+                } elseif (preg_match('/(Content-Type:)(.*)/i', $part, $math)) {
                     if (preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', $part), $subBoundary)) {
                         if ($subBoundary[1] != $boundary) {
                             $this->parserContent($subBoundary[1], $part);
