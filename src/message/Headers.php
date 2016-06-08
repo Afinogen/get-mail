@@ -51,26 +51,26 @@ class Headers
     /**
      * Parser headers
      */
+    
     protected function parserHeaders()
     {
         $headers = $this->asArray();
-        $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
-        $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
-        $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
-
-        preg_match(self::EMAIL_PATTERN, $this->_from, $email);
-        if(!empty($email)){
-            $email= $email[0];
-        }else{
-            $email = null;
-            new \Exception('Email not found in "'.$this->_from.'"');
+        if (preg_match_all('#<([^>]+)>#', current($headers['to']), $matches)) {
+            $this->_to = implode(',', $matches[1]);
+        } else {
+            $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
         }
-
-        $this->_fromName = str_replace($email, '', $this->_from);
-        $this->_fromName = trim($this->_fromName, '<>,');
-        $this->_fromName = trim($this->_fromName);
-
-        $this->_from = $email;
+        if (array_key_exists('cc', $headers) && preg_match_all('#<([^>]+)>#', current($headers['cc']), $matches)) {
+            $this->_cc = implode(',', $matches[1]);
+        } else {
+            $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
+        }
+        if (preg_match('#([^<]*)<([^>]+)>#', current($headers['from']), $matches)) {
+            $this->_from = $matches[2];
+            $this->_fromName = trim(self::decodeMimeString($matches[1]), " \t\n\r\0\x0B\"");
+        } else {
+            $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
+        }
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
@@ -83,9 +83,9 @@ class Headers
             }
         }
         $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject']), $this->getCharset()) : '';
-        
+
         $this->parseAutoReply();
-        
+
         if (isset($headers['content-transfer-encoding'])) {
             $this->_transferEncoding = trim(current($headers['content-transfer-encoding']));
         }
