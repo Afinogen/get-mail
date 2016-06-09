@@ -69,9 +69,15 @@ class Headers
 
         $this->_fromName = str_replace($email, '', $this->_from);
         $this->_fromName = trim($this->_fromName, '<>,');
-        $this->_fromName = trim($this->_fromName);
+        $this->_fromName = trim($this->_fromName,' "');
 
         $this->_from = $email;
+
+        //TODO может быть несколько получателей
+        preg_match(self::EMAIL_PATTERN, $this->_to, $email);
+        if(!empty($email)){
+            $this->_to = $email[0];
+        }
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
@@ -124,7 +130,7 @@ class Headers
             if (!empty($data)) {
                 array_shift($data);
                 $encode = array_shift($data);
-                $type = array_shift($data);
+                $type = strtoupper(array_shift($data));
                 if ($type == 'B') {
                     $str = base64_decode(array_shift($data));
                     $str = $str . ltrim($data[0], '=');

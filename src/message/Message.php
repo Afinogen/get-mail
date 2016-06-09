@@ -240,15 +240,31 @@ class Message
         $headers = Headers::toArray($part['header']."\r\n");
         $attachment->headers = $headers;
 
+        $pattern = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
         $name = '';
         if (isset($headers['content-type'])) {
             $data = explode(';', current($headers['content-type']));
 
             $attachment->contentType = trim($data[0]);
-
-            //если нет имени - текущее время
-            $name = isset($data[1]) ? preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si','$1',$data[1]) : time();
+            
+            array_shift($data);
+            if (count($data) == 1) {
+                $name = preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si', '$1', $data[0]);
+            } elseif (count($data) > 1) {
+                foreach ($data as $value) {
+                    if (preg_match($pattern, $value, $res)) {
+                        $name = $res[3];
+                    }
+                }
+            } else {
+                $name = time();
+            }
+            
             $name = Headers::decodeMimeString($name);
+            $encode = mb_detect_encoding($name, ['UTF-8', 'Windows-1251']);
+            if ($encode && $encode !== 'UTF-8') {
+                $name = mb_convert_encoding($name, 'UTF-8', $encode);
+            }
 
             $attachment->name = $name;
         }
@@ -256,8 +272,7 @@ class Message
         if (isset($headers['content-disposition'])) {
             $data = explode(';', current($headers['content-disposition']));
             $attachment->contentDisposition = trim($data[0]);
-
-            $pattern = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
+            
             $tmpName = $data;
 
             unset($tmpName[0]);
@@ -280,9 +295,15 @@ class Message
                 $name = implode('', $name);
                 $name = Headers::decodeMimeString($name);
                 $name = urldecode($name);
+
+                if (mb_detect_encoding($name) != 'UTF-8') {
+                    $name = mb_convert_encoding($name, 'UTF-8');
+                }
+                
                 $attachment->filename = $name;
             }else{
-                $attachment->filename = Headers::decodeMimeString($name);
+                $name = trim(preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $name));
+                $attachment->filename = $name;//Headers::decodeMimeString($name);
             }
         }
 
