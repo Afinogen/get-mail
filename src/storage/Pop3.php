@@ -7,11 +7,12 @@ use afinogen89\getmail\protocol;
 
 /**
  * Class Pop3
+ *
  * @package storage
  */
 class Pop3
 {
-    /** @var protocol\Pop3  */
+    /** @var protocol\Pop3 */
     private $_protocol;
 
     /**
@@ -20,7 +21,7 @@ class Pop3
     public function __construct($params)
     {
         if (is_array($params)) {
-            $params = (object) $params;
+            $params = (object)$params;
         }
 
         if ($params instanceof protocol\Pop3) {
@@ -32,10 +33,10 @@ class Pop3
             throw new \InvalidArgumentException('need at least user in params');
         }
 
-        $host     = isset($params->host)     ? $params->host     : 'localhost';
+        $host = isset($params->host) ? $params->host : 'localhost';
         $password = isset($params->password) ? $params->password : '';
-        $port     = isset($params->port)     ? $params->port     : null;
-        $ssl      = isset($params->ssl)      ? $params->ssl      : false;
+        $port = isset($params->port) ? $params->port : null;
+        $ssl = isset($params->ssl) ? $params->ssl : false;
 
         $this->_protocol = new protocol\Pop3();
         $this->_protocol->connect($host, $port, $ssl);
@@ -44,14 +45,15 @@ class Pop3
 
     /**
      * Count Message
+     *
      * @return int
      */
     public function countMessages()
     {
-        $count  = 0; // "Declare" variable before first usage.
+        $count = 0; // "Declare" variable before first usage.
         $octets = 0; // "Declare" variable since it's passed by reference
         $this->_protocol->status($count, $octets);
-        return (int) $count;
+        return (int)$count;
     }
 
     /**
@@ -79,6 +81,7 @@ class Pop3
      * identify the message.
      *
      * @param  int $id number of message
+     *
      * @throws \RuntimeException
      */
     public function removeMessage($id)
@@ -88,10 +91,10 @@ class Pop3
 
     /**
      * get unique id for one or all messages
-     *
      * if storage does not support unique ids it's the same as the message number
      *
      * @param int|null $id message number
+     *
      * @return array|string message number for given message or all messages as array
      * @throws \ExceptionInterface
      */
@@ -103,7 +106,7 @@ class Pop3
             }
             $count = $this->countMessages();
             if ($count < 1) {
-                return array();
+                return [];
             }
             $range = range(1, $count);
             return array_combine($range, $range);
@@ -114,7 +117,9 @@ class Pop3
 
     /**
      * Fetch message
+     *
      * @param int $id
+     *
      * @return Message
      * @throws \Exception
      * @throws protocol\Exception

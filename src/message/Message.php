@@ -4,6 +4,7 @@ namespace afinogen89\getmail\message;
 
 /**
  * Class Message
+ *
  * @package storage
  */
 class Message
@@ -48,6 +49,7 @@ class Message
 
     /**
      * @param string $path
+     *
      * @return int
      */
     public function saveToFile($path)
@@ -89,6 +91,7 @@ class Message
 
     /**
      * Текст письма
+     *
      * @return Content|null
      */
     public function getMsgBody()
@@ -114,6 +117,7 @@ class Message
 
     /**
      * Альтернативный текст письма
+     *
      * @return Content|null
      */
     public function getMsgAlternativeBody()
@@ -130,6 +134,7 @@ class Message
 
     /**
      * Разбор тела сообщения
+     *
      * @param string $boundary
      * @param string $content
      */
@@ -155,7 +160,9 @@ class Message
                         $type = trim($data[0]);
 
                         //get body message
-                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN || $type == Content::CT_MESSAGE_DELIVERY) {
+                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN
+                            || $type == Content::CT_MESSAGE_DELIVERY
+                        ) {
                             $this->parserBodyMessage($part);
                         } elseif ($type == Content::CT_MESSAGE_RFC822) {
                             $this->parserBodyMessage($part);
@@ -246,7 +253,7 @@ class Message
             $data = explode(';', current($headers['content-type']));
 
             $attachment->contentType = trim($data[0]);
-            
+
             array_shift($data);
             if (count($data) == 1) {
                 $name = preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si', '$1', $data[0]);
@@ -261,7 +268,12 @@ class Message
             }
             
             $name = Headers::decodeMimeString($name);
-            $encode = mb_detect_encoding($name, ['UTF-8', 'Windows-1251']);
+            $encode = mb_detect_encoding(
+                $name, [
+                    'UTF-8',
+                    'Windows-1251'
+                ]
+            );
             if ($encode && $encode !== 'UTF-8') {
                 $name = mb_convert_encoding($name, 'UTF-8', $encode);
             }
@@ -272,12 +284,12 @@ class Message
         if (isset($headers['content-disposition'])) {
             $data = explode(';', current($headers['content-disposition']));
             $attachment->contentDisposition = trim($data[0]);
-            
+
             $tmpName = $data;
 
             unset($tmpName[0]);
-            foreach($tmpName as $key=>$val) {
-                if (preg_match('/[\w\-]{3,}\=/i', trim($val), $result) && stripos($result[0], 'name') ===false) {
+            foreach ($tmpName as $key => $val) {
+                if (preg_match('/[\w\-]{3,}\=/i', trim($val), $result) && stripos($result[0], 'name') === false) {
                     unset($tmpName[$key]);
                 } else {
                     $tmpName[$key] = preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $val);
@@ -285,10 +297,10 @@ class Message
             }
 
             $tmpName = implode($tmpName);
-            $tmpName=preg_replace('#\s+#s',"\n\n",$tmpName);
-            if(preg_match_all($pattern, $tmpName, $result)){
+            $tmpName = preg_replace('#\s+#s', "\n\n", $tmpName);
+            if (preg_match_all($pattern, $tmpName, $result)) {
                 $name = [];
-                foreach($result[3] as $v){
+                foreach ($result[3] as $v) {
                     $name[] = $v;
                 }
 
@@ -299,9 +311,9 @@ class Message
                 if (mb_detect_encoding($name) != 'UTF-8') {
                     $name = mb_convert_encoding($name, 'UTF-8');
                 }
-                
+
                 $attachment->filename = $name;
-            }else{
+            } else {
                 $name = trim(preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $name));
                 $attachment->filename = $name;//Headers::decodeMimeString($name);
             }
@@ -322,12 +334,16 @@ class Message
 
     /**
      * @param string $str
+     *
      * @return array
      */
     public static function splitContent($str)
     {
         $data = preg_split('/[\r\n]{3,}/si', $str);
 
-        return ['header' => array_shift($data), 'content' => implode("\r\n", $data)];
+        return [
+            'header' => array_shift($data),
+            'content' => implode("\r\n", $data)
+        ];
     }
 }

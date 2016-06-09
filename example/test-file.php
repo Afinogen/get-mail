@@ -30,16 +30,16 @@ $storage = new \afinogen89\getmail\storage\File('../eml/');
 //Перебор всех писем
 //echo $storage->countMessage().PHP_EOL;
 
-for($i=0; $i< $storage->countMessage(); $i++) {
+for ($i = 0; $i < $storage->countMessage(); $i++) {
     echo PHP_EOL.'---------------------------------------- '.$i.' ------------------------------------------------'.PHP_EOL;
-    
+
     $msg = $storage->getMessage($i);
 
     echo $msg->getHeaders()->getFrom().PHP_EOL;
     echo $msg->getHeaders()->getFromName().PHP_EOL;
     echo $msg->getHeaders()->getTo().PHP_EOL;
     echo $msg->getHeaders()->getCC().PHP_EOL;
-    
+
     echo $msg->getHeaders()->getSubject().PHP_EOL;
 
     foreach ($msg->getParts() as $part) {

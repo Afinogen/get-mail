@@ -4,16 +4,17 @@ namespace afinogen89\getmail\protocol;
 
 /**
  * Class Pop3
+ *
  * @package protocol
  */
 class Pop3
 {
-    /** @var int  */
+    /** @var int */
     public $timeoutConnection = 30;
 
     private $hasTop;
 
-    /** @var   */
+    /** @var */
     private $_socket;
 
     /** @var  int */
@@ -42,9 +43,10 @@ class Pop3
     /**
      * Open connection to POP3 server
      *
-     * @param  string      $host  hostname or IP address of POP3 server
-     * @param  int|null    $port  of POP3 server, default is 110 (995 for ssl)
-     * @param  string|bool $ssl   use 'SSL', 'TLS' or false
+     * @param  string $host hostname or IP address of POP3 server
+     * @param  int|null $port of POP3 server, default is 110 (995 for ssl)
+     * @param  string|bool $ssl use 'SSL', 'TLS' or false
+     *
      * @throws \RuntimeException
      * @return string welcome message
      */
@@ -58,7 +60,7 @@ class Pop3
 
         switch ($ssl) {
             case 'ssl':
-                $host = 'ssl://' . $host;
+                $host = 'ssl://'.$host;
                 if (!$port) {
                     $port = 995;
                 }
@@ -74,7 +76,7 @@ class Pop3
 
         try {
             $this->_socket = fsockopen($host, $port, $errno, $errstr, $this->timeoutConnection);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             //throw new \RuntimeException('cannot connect to host '.$host.PHP_EOL.$errstr, $errno);
         }
 
@@ -89,7 +91,7 @@ class Pop3
         if (!strpos($this->_timestamp, '@')) {
             $this->_timestamp = null;
         } else {
-            $this->_timestamp = '<' . $this->_timestamp . '>';
+            $this->_timestamp = '<'.$this->_timestamp.'>';
         }
 
         if ($isTls) {
@@ -107,13 +109,14 @@ class Pop3
      * Send a request
      *
      * @param string $request your request without newline
+     *
      * @throws \RuntimeException
      */
     public function sendRequest($request)
     {
         try {
-            $result = fputs($this->_socket, $request . "\r\n");
-        }catch (\Exception $e) {
+            $result = fputs($this->_socket, $request."\r\n");
+        } catch (\Exception $e) {
 
         }
 
@@ -126,6 +129,7 @@ class Pop3
      * read a response
      *
      * @param  bool $multiline response has multiple lines and should be read until "<nl>.<nl>"
+     *
      * @throws \RuntimeException
      * @return string response
      */
@@ -133,7 +137,7 @@ class Pop3
     {
         try {
             $result = fgets($this->_socket);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
 
         }
 
@@ -173,8 +177,10 @@ class Pop3
      *
      * @see sendRequest()
      * @see readResponse()
-     * @param  string $request    request
-     * @param  bool   $multiline  multiline response?
+     *
+     * @param  string $request request
+     * @param  bool $multiline multiline response?
+     *
      * @return string             result from readResponse()
      */
     public function request($request, $multiline = false)
@@ -216,15 +222,15 @@ class Pop3
     /**
      * Login to POP3 server. Can use APOP
      *
-     * @param  string $user     username
+     * @param  string $user username
      * @param  string $password password
-     * @param  bool   $tryApop  should APOP be tried?
+     * @param  bool $tryApop should APOP be tried?
      */
     public function login($user, $password, $tryApop = true)
     {
         if ($tryApop && $this->_timestamp) {
             try {
-                $this->request("APOP $user " . md5($this->_timestamp . $password));
+                $this->request("APOP $user ".md5($this->_timestamp.$password));
                 return;
             } catch (\Exception $e) {
                 // ignore
@@ -239,8 +245,8 @@ class Pop3
     /**
      * Make STAT call for message count and size sum
      *
-     * @param  int $messages  out parameter with count of messages
-     * @param  int $octets    out parameter with size in octets of messages
+     * @param  int $messages out parameter with count of messages
+     * @param  int $octets out parameter with size in octets of messages
      */
     public function status(&$messages, &$octets)
     {
@@ -256,6 +262,7 @@ class Pop3
      * Make LIST call for size of message(s)
      *
      * @param  int|null $msgno number of message, null for all
+     *
      * @return int|array size of given message or list with array(num => size)
      */
     public function getList($msgno = null)
@@ -264,15 +271,15 @@ class Pop3
             $result = $this->request("LIST $msgno");
 
             list(, $result) = explode(' ', $result);
-            return (int) $result;
+            return (int)$result;
         }
 
         $result = $this->request('LIST', true);
-        $messages = array();
+        $messages = [];
         $line = strtok($result, "\n");
         while ($line) {
             list($no, $size) = explode(' ', trim($line));
-            $messages[(int) $no] = (int) $size;
+            $messages[(int)$no] = (int)$size;
             $line = strtok("\n");
         }
 
@@ -284,6 +291,7 @@ class Pop3
      * Make UIDL call for getting a uniqueid
      *
      * @param  int|null $msgno number of message, null for all
+     *
      * @return string|array uniqueid of message or list with array(num => uniqueid)
      */
     public function uniqueid($msgno = null)
@@ -298,13 +306,13 @@ class Pop3
         $result = $this->request('UIDL', true);
 
         $result = explode("\n", $result);
-        $messages = array();
+        $messages = [];
         foreach ($result as $line) {
             if (!$line) {
                 continue;
             }
             list($no, $id) = explode(' ', trim($line), 2);
-            $messages[(int) $no] = $id;
+            $messages[(int)$no] = $id;
         }
 
         return $messages;
@@ -314,13 +322,13 @@ class Pop3
     /**
      * Make TOP call for getting headers and maybe some body lines
      * This method also sets hasTop - before it it's not known if top is supported
-     *
      * The fallback makes normal RETR call, which retrieves the whole message. Additional
      * lines are not removed.
      *
-     * @param  int  $msgno    number of message
-     * @param  int  $lines    number of wanted body lines (empty line is inserted after header lines)
+     * @param  int $msgno number of message
+     * @param  int $lines number of wanted body lines (empty line is inserted after header lines)
      * @param  bool $fallback fallback with full retrieve if top is not supported
+     *
      * @throws \RuntimeException
      * @throws \Exception
      * @return string message headers with wanted body lines
@@ -336,7 +344,7 @@ class Pop3
         }
         $this->hasTop = true;
 
-        $lines = (!$lines || $lines < 1) ? 0 : (int) $lines;
+        $lines = (!$lines || $lines < 1) ? 0 : (int)$lines;
 
         try {
             $result = $this->request("TOP $msgno $lines", true);
@@ -355,7 +363,8 @@ class Pop3
     /**
      * Make a RETR call for retrieving a full message with headers and body
      *
-     * @param  int $msgno  message number
+     * @param  int $msgno message number
+     *
      * @return string message
      */
     public function retrieve($msgno)

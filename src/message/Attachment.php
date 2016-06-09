@@ -4,6 +4,7 @@ namespace afinogen89\getmail\message;
 
 /**
  * Class Attachment
+ *
  * @package storage
  */
 class Attachment

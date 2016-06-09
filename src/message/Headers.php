@@ -4,6 +4,7 @@ namespace afinogen89\getmail\message;
 
 /**
  * Class Headers
+ *
  * @package storage
  */
 class Headers
@@ -36,7 +37,7 @@ class Headers
     /** @var  string */
     private $_transferEncoding;
     /** @var  bool */
-    private  $_isAutoReply;
+    private $_isAutoReply;
 
     /**
      * @param string $headers
@@ -60,38 +61,37 @@ class Headers
         $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
 
         preg_match(self::EMAIL_PATTERN, $this->_from, $email);
-        if(!empty($email)){
-            $email= $email[0];
-        }else{
+        if (!empty($email)) {
+            $email = $email[0];
+        } else {
             $email = null;
             new \Exception('Email not found in "'.$this->_from.'"');
         }
 
         $this->_fromName = str_replace($email, '', $this->_from);
         $this->_fromName = trim($this->_fromName, '<>,');
-        $this->_fromName = trim($this->_fromName,' "');
+        $this->_fromName = trim($this->_fromName, ' "');
 
         $this->_from = $email;
 
         //TODO может быть несколько получателей
         preg_match(self::EMAIL_PATTERN, $this->_to, $email);
-        if(!empty($email)){
+        if (!empty($email)) {
             $this->_to = $email[0];
         }
 
         $part = current($headers['content-type']);
         $this->_messageContentType = trim(explode(';', $part)[0]);
 
-        if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/\=]+)/i', $part, $result))
-        {
-            foreach($result[1] as $key=>$val) {
+        if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/\=]+)/i', $part, $result)) {
+            foreach ($result[1] as $key => $val) {
                 $val = '_'.strtolower($val);
                 $this->{$val} = $result[2][$key];
             }
         }
-        
+
         $this->parseAutoReply();
-        
+
         if (isset($headers['content-transfer-encoding'])) {
             $this->_transferEncoding = trim(current($headers['content-transfer-encoding']));
         }
@@ -101,7 +101,7 @@ class Headers
     {
         //TODO проверить другие варианты
         $replays = ['auto-replied'];
-        
+
         $headers = $this->asArray();
         if (isset($headers['auto-submitted']) && is_array($headers['auto-submitted'])) {
             $headers['auto-submitted'] = current($headers['auto-submitted']);
@@ -118,13 +118,14 @@ class Headers
 
     /**
      * @param string $strMime
+     *
      * @return string
      */
     public static function decodeMimeString($strMime)
     {
         $items = preg_split('/[\r\n]{2,}/si', $strMime);
         $result = '';
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $data = explode('?', $item);
             $str = '';
             if (!empty($data)) {
@@ -133,11 +134,11 @@ class Headers
                 $type = strtoupper(array_shift($data));
                 if ($type == 'B') {
                     $str = base64_decode(array_shift($data));
-                    $str = $str . ltrim($data[0], '=');
+                    $str = $str.ltrim($data[0], '=');
                 } elseif ($type == 'Q') {
                     $str = quoted_printable_decode(array_shift($data));
                 }
-                if (!empty($encode)){
+                if (!empty($encode)) {
                     $str = mb_convert_encoding($str, 'UTF-8', $encode);
                 }
             }
@@ -253,16 +254,17 @@ class Headers
 
     /**
      * @param string $headers
+     *
      * @return array
      */
     public static function toArray($headers)
     {
         $headers .= "\r\n\r\n";
-        preg_match_all('#[\r\n]*([\w-]+\:)(.+?)(?=([\r\n]+[\w-]+\:|[\r\n]{3,}|\n{2,}))#si',$headers,$result);
+        preg_match_all('#[\r\n]*([\w-]+\:)(.+?)(?=([\r\n]+[\w-]+\:|[\r\n]{3,}|\n{2,}))#si', $headers, $result);
 
         $headers = [];
         foreach ($result[1] as $k => $header) {
-            $header = strtolower(rtrim($header , ':'));
+            $header = strtolower(rtrim($header, ':'));
             $headers[$header][] = trim($result[2][$k]);
         }
 

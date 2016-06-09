@@ -7,6 +7,7 @@ use afinogen89\getmail\protocol;
 
 /**
  * Class File
+ *
  * @package afinogen89\getmail\storage
  */
 class File
@@ -21,6 +22,7 @@ class File
 
     /**
      * Получение количества сообщений
+     *
      * @return int
      */
     public function countMessage()
@@ -38,6 +40,7 @@ class File
 
     /**
      * Удаление сообщения
+     *
      * @param int $id
      */
     public function removeMessage($id)
@@ -47,7 +50,9 @@ class File
 
     /**
      * Получение сообщения
+     *
      * @param int $id
+     *
      * @return Message
      */
     public function getMessage($id)
