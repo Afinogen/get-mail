@@ -10,7 +10,7 @@
 require('../vendor/autoload.php');
 
 
-$storage = new \afinogen89\getmail\storage\File('../email/');
+$storage = new \afinogen89\getmail\storage\File('../eml/');
 
 /// Вывод одного письма
 //$msg = $storage->getMessage(658);
@@ -28,16 +28,21 @@ $storage = new \afinogen89\getmail\storage\File('../email/');
 
 for($i=0; $i< $storage->countMessage(); $i++) {
     echo PHP_EOL.'---------------------------------------- '.$i.' ------------------------------------------------'.PHP_EOL;
-
-    $msg = $storage->getMessage($i);
     
-    var_dump($msg->getHeaders()->isAutoReply());
+    $msg = $storage->getMessage($i);
 
-    echo $msg->getHeaders()->getSubject() . PHP_EOL;
+    echo $msg->getHeaders()->getFrom().PHP_EOL;
+    echo $msg->getHeaders()->getTo().PHP_EOL;
+    echo $msg->getHeaders()->getCC().PHP_EOL;
+    
+    echo $msg->getHeaders()->getSubject().PHP_EOL;
 
     foreach ($msg->getParts() as $part) {
-            echo $part->getContentDecode();
+        echo $part->getContentDecode();
     }
 
-    echo 'Count Files: '.count($msg->getAttachments());
+    echo PHP_EOL.'Count Files: '.count($msg->getAttachments()).PHP_EOL;
+    foreach ($msg->getAttachments() as $attachment) {
+        echo $attachment->filename.PHP_EOL;
+    }
 }
