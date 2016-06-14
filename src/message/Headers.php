@@ -59,6 +59,7 @@ class Headers
         $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
         $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
+        $this->_date = isset($headers['date']) ? current($headers['date']) : '';
 
         preg_match(self::EMAIL_PATTERN, $this->_from, $email);
         if (!empty($email)) {
