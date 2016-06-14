@@ -13,9 +13,20 @@ require('../vendor/autoload.php');
 $storage = new \afinogen89\getmail\storage\File('../eml/');
 
 //// Вывод одного письма
-//$msg = $storage->getMessage(167); 
+//$msg = $storage->getMessage(1357); 
 //
 //$msg->saveToFile('1.eml');
+//
+//echo 'From: '.$msg->getHeaders()->getFrom().PHP_EOL;
+//echo 'From Name: '.$msg->getHeaders()->getFromName().PHP_EOL;
+//echo 'To: '.$msg->getHeaders()->getTo().PHP_EOL;
+//echo 'Copy: '.$msg->getHeaders()->getCC().PHP_EOL;
+//
+//echo 'Subject: '.$msg->getHeaders()->getSubject().PHP_EOL;
+//
+//foreach ($msg->getParts() as $part) {
+//    echo $part->getContentDecode();
+//}
 //
 //foreach ($msg->getParts() as $part) {
 //    echo  $part->getContentDecode().PHP_EOL;
@@ -35,12 +46,12 @@ for ($i = 0; $i < $storage->countMessage(); $i++) {
 
     $msg = $storage->getMessage($i);
 
-    echo $msg->getHeaders()->getFrom().PHP_EOL;
-    echo $msg->getHeaders()->getFromName().PHP_EOL;
-    echo $msg->getHeaders()->getTo().PHP_EOL;
-    echo $msg->getHeaders()->getCC().PHP_EOL;
+    echo 'From: '.$msg->getHeaders()->getFrom().PHP_EOL;
+    echo 'From Name: '.$msg->getHeaders()->getFromName().PHP_EOL;
+    echo 'To: '.$msg->getHeaders()->getTo().PHP_EOL;
+    echo 'Copy: '.$msg->getHeaders()->getCC().PHP_EOL;
 
-    echo $msg->getHeaders()->getSubject().PHP_EOL;
+    echo 'Subject: '.$msg->getHeaders()->getSubject().PHP_EOL;
 
     foreach ($msg->getParts() as $part) {
         echo $part->getContentDecode();

@@ -58,7 +58,6 @@ class Headers
         $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
         $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
-        $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject'])) : '';
         $this->_date = isset($headers['date']) ? current($headers['date']) : '';
 
         preg_match(self::EMAIL_PATTERN, $this->_from, $email);
@@ -91,6 +90,8 @@ class Headers
             }
         }
 
+        $this->_subject = isset($headers['subject']) ? self::decodeMimeString(current($headers['subject']), $this->getCharset()) : '';
+
         $this->parseAutoReply();
 
         if (isset($headers['content-transfer-encoding'])) {
@@ -119,10 +120,11 @@ class Headers
 
     /**
      * @param string $strMime
+     * @param string $charset
      *
      * @return string
      */
-    public static function decodeMimeString($strMime)
+    public static function decodeMimeString($strMime, $charset = null)
     {
         $items = preg_split('/[\r\n]{2,}/si', $strMime);
         $result = '';
@@ -144,6 +146,10 @@ class Headers
                 }
             }
             $result .= $str;
+        }
+
+        if (!empty($charset)){
+            $strMime = mb_convert_encoding($strMime, 'UTF-8', $charset);
         }
 
         return $result ?: $strMime;
