@@ -55,8 +55,8 @@ class Headers
     protected function parserHeaders()
     {
         $headers = $this->asArray();
-//        $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
-//        $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
+        $this->_to = isset($headers['to']) ? self::decodeMimeString(current($headers['to'])) : '';
+        $this->_cc = isset($headers['cc']) ? self::decodeMimeString(current($headers['cc'])) : '';
         $this->_from = isset($headers['from']) ? self::decodeMimeString(current($headers['from'])) : '';
         $this->_date = isset($headers['date']) ? current($headers['date']) : '';
 
@@ -131,7 +131,7 @@ class Headers
         foreach ($items as $item) {
             $data = explode('?', $item);
             $str = '';
-            if (!empty($data) && count($data) == 1) {
+            if (!empty($data) && count($data) == 1 && is_null($charset)) {
                 $str = $data[0];
             } elseif (!empty($data)) {
                 array_shift($data);
