@@ -65,7 +65,7 @@ class Headers
             $email = $email[0];
         } else {
             $email = null;
-            new \Exception('Email not found in "'.$this->_from.'"');
+            throw new \Exception('Email not found in "'.$this->_from.'"');
         }
 
         $this->_fromName = str_replace($email, '', $this->_from);
@@ -134,17 +134,8 @@ class Headers
             if (!empty($data) && count($data) == 1 && is_null($charset)) {
                 $str = $data[0];
             } elseif (!empty($data)) {
-                array_shift($data);
-                $encode = array_shift($data);
-                $type = strtoupper(array_shift($data));
-                if ($type == 'B') {
-                    $str = base64_decode(array_shift($data));
-                    $str = $str.ltrim($data[0], '=');
-                } elseif ($type == 'Q') {
-                    $str = quoted_printable_decode(array_shift($data));
-                }
-                if (!empty($encode)) {
-                    $str = mb_convert_encoding($str, 'UTF-8', $encode);
+                while (!empty($data)) {
+                    $str .= self::decodeMimeStringPart($data);
                 }
             }
             $result .= $str;
@@ -155,6 +146,29 @@ class Headers
         }
 
         return $result ?: $strMime;
+    }
+
+    public static function decodeMimeStringPart(&$data)
+    {
+        $str = '';
+        array_shift($data);
+        $encode = array_shift($data);
+        $type = strtoupper(array_shift($data));
+        if ($type == 'B') {
+            $str = base64_decode(array_shift($data));
+            $str .= trim($data[0], ' =');
+        } elseif ($type == 'Q') {
+            $str = quoted_printable_decode(array_shift($data));
+            if (!empty($data)) {
+                $str .= trim($data[0], ' =');
+            }
+        }
+
+        if (!empty($encode)) {
+            $str = mb_convert_encoding($str, 'UTF-8', $encode);
+        }
+
+        return $str;
     }
 
     /**
