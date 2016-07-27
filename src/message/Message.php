@@ -159,9 +159,11 @@ class Message
                         $data = explode(';', $math[2]);
                         $type = trim($data[0]);
 
+                        $isAttachment = (bool)strpos($part, 'Content-Disposition: attachment;');
+
                         //get body message
-                        if ($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN
-                            || $type == Content::CT_MESSAGE_DELIVERY
+                        if (($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN
+                            || $type == Content::CT_MESSAGE_DELIVERY) && !$isAttachment
                         ) {
                             $this->parserBodyMessage($part);
                         } elseif ($type == Content::CT_MESSAGE_RFC822) {
