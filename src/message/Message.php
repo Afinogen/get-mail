@@ -208,7 +208,12 @@ class Message
         if ($content->contentType == Content::CT_TEXT_HTML || $content->contentType == Content::CT_TEXT_PLAIN) {
             $headers = Headers::toArray($dataContent['header']."\r\n\r\n");
             $data = explode(';', current($headers['content-type']));
-            $content->charset = trim(explode('=', $data[1])[1]);
+            if (count($data) > 1) {
+                $content->charset = trim(explode('=', $data[1])[1]);
+            } else {
+                $content->charset = $this->getHeaders()->getCharset();
+            }
+            
             if (isset($headers['content-transfer-encoding'])) {
                 $content->transferEncoding = trim(current($headers['content-transfer-encoding']));
             }
