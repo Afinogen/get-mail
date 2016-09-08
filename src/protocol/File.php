@@ -18,9 +18,12 @@ class File
     private $_mails = [];
 
     /**
+     * File constructor.
      * Переменная $path может принимать путь либо к папке, либо к файлу
      *
      * @param string $path
+     *
+     * @throws \Exception
      */
     public function __construct($path)
     {
@@ -34,9 +37,11 @@ class File
                     'is_deleted' => 0,
                     'file_name' => $path
                 ];
+            } else {
+                throw new \Exception('File format not `eml`');
             }
         } else {
-            new \Exception('$path может быть либо папкой либо файлом');
+            throw new \Exception('$path может быть либо папкой либо файлом');
         }
     }
 
@@ -84,7 +89,7 @@ class File
      *
      * @return int
      */
-    public function countMessage()
+    public function countMessages()
     {
         return count($this->_mails);
     }

@@ -10,7 +10,7 @@ use afinogen89\getmail\protocol;
  *
  * @package storage
  */
-class Pop3
+class Pop3 implements StorageInterface
 {
     /** @var protocol\Pop3 */
     private $_protocol;

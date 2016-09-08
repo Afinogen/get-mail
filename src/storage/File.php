@@ -10,7 +10,7 @@ use afinogen89\getmail\protocol;
  *
  * @package afinogen89\getmail\storage
  */
-class File
+class File implements StorageInterface
 {
     /** @var  protocol\File */
     private $_protocol;
@@ -25,9 +25,9 @@ class File
      *
      * @return int
      */
-    public function countMessage()
+    public function countMessages()
     {
-        return $this->_protocol->countMessage();
+        return $this->_protocol->countMessages();
     }
 
     /**
