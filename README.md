@@ -56,7 +56,7 @@ foreach($msg->getAttachment() as $t) {
 
 Через папку с письмами (расширение файлов eml)
 ```php
-$storage = new storage\File('../email/');
+$storage = new storage\File(['path' => '../email/']);
 $msg = $storage->getMessage(1);
 $msg->saveToFile('/tmp/1.eml');
 echo $msg->getHeader()->getSubject();
@@ -69,6 +69,18 @@ $storage = new storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.co
 
 Для генерации пароля необходимо создать приложение на странице https://security.google.com/settings/security/apppasswords
 
+Подключение нужного хранилища через конфиг, позволяет быстро переключаться не меняя код  
+```php
+$storage = storage\Storage::init(
+    [
+        'storage' => \afinogen89\getmail\storage\Storage::POP3,
+        'host' => 'pop.gmail.com',
+        'user' => 'test@gmail.com',
+        'password' => '123456',
+        'ssl' => 'SSL'
+    ]
+);
+```
 
 English version
 -----------

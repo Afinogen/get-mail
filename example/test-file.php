@@ -10,7 +10,7 @@
 require('../vendor/autoload.php');
 
 
-$storage = new \afinogen89\getmail\storage\File('../eml/');
+$storage = new \afinogen89\getmail\storage\File(['path' => '../eml/']);
 
 //// Вывод одного письма
 //$msg = $storage->getMessage(1357); 
@@ -41,7 +41,7 @@ $storage = new \afinogen89\getmail\storage\File('../eml/');
 //Перебор всех писем
 //echo $storage->countMessage().PHP_EOL;
 
-for ($i = 0; $i < $storage->countMessage(); $i++) {
+for ($i = 0; $i < $storage->countMessages(); $i++) {
     echo PHP_EOL.'---------------------------------------- '.$i.' ------------------------------------------------'.PHP_EOL;
 
     $msg = $storage->getMessage($i);

@@ -15,9 +15,21 @@ class File implements StorageInterface
     /** @var  protocol\File */
     private $_protocol;
 
-    public function __construct($path)
+    /**
+     * File constructor.
+     * Необходим параметр path для указания папки или файла с которым работать
+     *
+     * @param array $conf
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(array $conf)
     {
-        $this->_protocol = new protocol\File($path);
+        if (empty($conf['path'])) {
+            throw new \InvalidArgumentException('Need `path` parameters');
+        }
+
+        $this->_protocol = new protocol\File($conf['path']);
     }
 
     /**
