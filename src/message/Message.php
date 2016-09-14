@@ -159,7 +159,7 @@ class Message
                         $data = explode(';', $math[2]);
                         $type = trim($data[0]);
 
-                        $isAttachment = (bool)strpos($part, 'Content-Disposition: attachment;');
+                        $isAttachment = (strpos($part, 'Content-Disposition: attachment;') !== false);
 
                         //get body message
                         if (($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN
