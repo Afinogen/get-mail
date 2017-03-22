@@ -164,7 +164,7 @@ class Headers
             }
         }
 
-        if (!empty($encode)) {
+        if (!empty($encode) && !empty($str)) {
             $str = mb_convert_encoding($str, 'UTF-8', $encode);
         }
 
