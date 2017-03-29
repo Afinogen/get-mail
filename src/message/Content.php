@@ -58,6 +58,10 @@ class Content
             $content = mb_convert_encoding($content, 'UTF-8', $this->charset);
         }
 
+        if ($this->contentType === self::CT_TEXT_HTML && $this->transferEncoding === 'quoted-printable') {
+            $content = html_entity_decode($content);
+        }
+
         return $content;
     }
 }

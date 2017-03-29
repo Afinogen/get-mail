@@ -179,6 +179,7 @@ class Message
             $content = new Content();
             $content->content = $this->_content;
             $content->charset = $this->_header->getCharset();
+            $content->contentType = $this->getHeaders()->getMessageContentType();
             $content->transferEncoding = $this->_header->getTransferEncoding();
 
             $this->_parts[] = $content;
