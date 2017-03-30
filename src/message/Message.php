@@ -274,8 +274,18 @@ class Message
             } else {
                 $name = time();
             }
-            
-            $name = Headers::decodeMimeString($name);
+
+            $tmpFileName = Headers::decodeMimeString($name);
+            //TODO не очень хорошее решение, если кто предложит лучше, готов рассмотреть
+            // Content-Disposition: attachment; filename*=UTF-8''%D0%B7%D0%B0%D1%8F%D0%B2%D0%BA%D0%B0%20%D0%95%D0%B2%D1%80%D0%BE%D0%94%D0%BE%D0%BD%208%D1%84%D0%B5%D0%B2%D1%802017%2Exls
+            if ($tmpFileName === $name) {
+                $tmp = explode("''", $name);
+                if (count($tmp) > 1) {
+                    $tmpFileName = urldecode($tmp[1]);
+                }
+            }
+
+            $name = $tmpFileName;
             $encode = mb_detect_encoding(
                 $name, [
                     'UTF-8',
