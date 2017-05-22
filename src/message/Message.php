@@ -13,22 +13,27 @@ class Message
      * @var int
      */
     public $id;
+
     /**
      * @var string
      */
     private $_originMessage;
+
     /**
      * @var Headers
      */
     private $_header;
+
     /**
      * @var string
      */
     private $_content;
+
     /**
      * @var Content[]
      */
     private $_parts = [];
+
     /**
      * @var Attachment[]
      */
@@ -112,6 +117,7 @@ class Message
                 $body = $this->_parts[0]->getContentDecode();
             }
         }
+
         return $body;
     }
 
@@ -122,13 +128,20 @@ class Message
      */
     public function getMsgAlternativeBody()
     {
-        if (!empty($this->_parts) && $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_ALTERNATIVE) {
+        if (
+            !empty($this->_parts)
+            && (
+                $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_ALTERNATIVE
+                || $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_MIXED
+            )
+        ) {
             foreach ($this->_parts as $part) {
                 if ($part->contentType == Content::CT_TEXT_PLAIN) {
                     return $part->getContentDecode();
                 }
             }
         }
+
         return null;
     }
 
@@ -163,7 +176,8 @@ class Message
 
                         //get body message
                         if (($type == Content::CT_MULTIPART_ALTERNATIVE || $type == Content::CT_TEXT_HTML || $type == Content::CT_TEXT_PLAIN
-                            || $type == Content::CT_MESSAGE_DELIVERY) && !$isAttachment
+                                || $type == Content::CT_MESSAGE_DELIVERY)
+                            && !$isAttachment
                         ) {
                             $this->parserBodyMessage($part);
                         } elseif ($type == Content::CT_MESSAGE_RFC822) {
@@ -214,7 +228,7 @@ class Message
             } else {
                 $content->charset = $this->getHeaders()->getCharset();
             }
-            
+
             if (isset($headers['content-transfer-encoding'])) {
                 $content->transferEncoding = trim(current($headers['content-transfer-encoding']));
             }
@@ -360,7 +374,7 @@ class Message
         $data = preg_split('/[\r\n]{3,}/si', $str);
 
         return [
-            'header' => array_shift($data),
+            'header'  => array_shift($data),
             'content' => implode("\r\n", $data)
         ];
     }

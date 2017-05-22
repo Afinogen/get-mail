@@ -10,6 +10,7 @@ namespace afinogen89\getmail\message;
 class Content
 {
     const CT_MULTIPART_ALTERNATIVE = 'multipart/alternative';
+    const CT_MULTIPART_MIXED = 'multipart/mixed';
     const CT_TEXT_PLAIN = 'text/plain';
     const CT_TEXT_HTML = 'text/html';
     const CT_MESSAGE_DELIVERY = 'message/delivery-status';
