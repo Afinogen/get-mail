@@ -97,7 +97,7 @@ class Message
     /**
      * Текст письма
      *
-     * @return Content|null
+     * @return string|null
      */
     public function getMsgBody()
     {
@@ -124,7 +124,7 @@ class Message
     /**
      * Альтернативный текст письма
      *
-     * @return Content|null
+     * @return string|null
      */
     public function getMsgAlternativeBody()
     {

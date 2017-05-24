@@ -158,12 +158,13 @@ class File
     {
         if ($this->_mails && isset($this->_mails[$id])) {
             $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
-            preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', $data), $subBoundary);
-            if (isset($subBoundary[1])) {
-                $data = preg_split('/'.$subBoundary[1].'[\"\r\n]/si', $data)[0].$subBoundary[1].'"';
-            } else {
-                $data = preg_split('/[\n\r]{3,}/s', $data)[0];
-            }
+//            preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', $data), $subBoundary);
+//            if (isset($subBoundary[1])) {
+//                $data = preg_split('/'.$subBoundary[1].'[\"\r\n]/si', $data)[0].$subBoundary[1].'"';
+//            } else {
+            //@TODO продумать разделитель, могут быть проблемы из-за этого
+            $data = preg_split('/[\n\r]{3,}/s', $data)[0];
+//            }
 
             return $data;
         } else {
