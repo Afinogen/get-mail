@@ -29,7 +29,7 @@ php composer.phar require --prefer-dist afinogen89/get-mail "dev-master"
 Работа только с протоколом:
 
 ```php
-$pop3 = new protocol\Pop3('example.ru');
+$pop3 = new afinogen89\getmail\protocol\Pop3('example.ru');
 $pop3->login('data@example.ru', '123456');
 $msgList = $pop3->getList();
 $pop3->logout();
@@ -40,38 +40,38 @@ $pop3->logout();
 Протокол POP3
 
 ```php
-$storage = new storage\Pop3(['host' => 'example.ru', 'user' => 'data@example.ru', 'password' => '123456']);
+$storage = new afinogen89\getmail\storage\Pop3(['host' => 'example.ru', 'user' => 'data@example.ru', 'password' => '123456']);
 $msg = $storage->getMessage(1);
 $msg->saveToFile('/tmp/1.eml');
-echo $msg->getHeader()->getSubject();
+echo $msg->getHeaders()->getSubject();
 
 foreach($msg->getParts() as $part) {
     echo $part->getContentDecode().PHP_EOL;
 }
 
-foreach($msg->getAttachment() as $t) {
+foreach($msg->getAttachments() as $t) {
     $t->saveToFile('/tmp/' . $t->filename);
 }
 ```
 
 Через папку с письмами (расширение файлов eml)
 ```php
-$storage = new storage\File(['path' => '../email/']);
+$storage = new afinogen89\getmail\storage\File(['path' => '../email/']);
 $msg = $storage->getMessage(1);
 $msg->saveToFile('/tmp/1.eml');
-echo $msg->getHeader()->getSubject();
+echo $msg->getHeaders()->getSubject();
 ```
 
 Пример подключения к gmail
 ```php
-$storage = new storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => 'pass', 'ssl' => 'SSL']);
+$storage = new afinogen89\getmail\storage\Pop3(['host' => 'pop.gmail.com', 'user' => 'test@gmail.com', 'password' => 'pass', 'ssl' => 'SSL']);
 ```
 
 Для генерации пароля необходимо создать приложение на странице https://security.google.com/settings/security/apppasswords
 
 Подключение нужного хранилища через конфиг, позволяет быстро переключаться не меняя код  
 ```php
-$storage = storage\Storage::init(
+$storage = afinogen89\getmail\storage\Storage::init(
     [
         'storage' => \afinogen89\getmail\storage\Storage::POP3,
         'host' => 'pop.gmail.com',
@@ -111,7 +111,7 @@ Usage
 Once the extension is installed, simply use it in your code by  POP3 protocol:
 
 ```php
-$pop3 = new protocol\Pop3('example.ru');
+$pop3 = new afinogen89\getmail\protocol\Pop3('example.ru');
 $pop3->login('data@example.ru', '123456');
 $msgList = $pop3->getList();
 $pop3->logout();
@@ -120,16 +120,16 @@ $pop3->logout();
 Get message from mail:
 
 ```php
-$storage = new storage\Pop3(['host' => 'example.ru', 'user' => 'data@example.ru', 'password' => '123456']);
+$storage = new afinogen89\getmail\storage\Pop3(['host' => 'example.ru', 'user' => 'data@example.ru', 'password' => '123456']);
 $msg = $storage->getMessage(1);
 $msg->saveToFile('/tmp/1.eml');
-echo $msg->getHeader()->getSubject();
+echo $msg->getHeaders()->getSubject();
 
 foreach($msg->getParts() as $part) {
     echo $part->getContentDecode().PHP_EOL;
 }
 
-foreach($msg->getAttachment() as $t) {
+foreach($msg->getAttachments() as $t) {
     $t->saveToFile('/tmp/' . $t->filename);
 }
 ```
