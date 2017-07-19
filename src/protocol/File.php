@@ -35,7 +35,7 @@ class File
             if ($path_info['extension'] == 'eml') {
                 $this->_mails[] = [
                     'is_deleted' => 0,
-                    'file_name' => $path
+                    'file_name'  => $path
                 ];
             } else {
                 throw new \Exception('File format not `eml`');
@@ -78,7 +78,7 @@ class File
             if ($path_info['extension'] == 'eml') {
                 $this->_mails[] = [
                     'is_deleted' => 0,
-                    'file_name' => $file
+                    'file_name'  => $file
                 ];
             }
         }
@@ -112,8 +112,10 @@ class File
             foreach ($this->_mails as $mail) {
                 $result[] = filesize($this->_path.'/'.$mail['file_name']);
             }
+
             return $result;
         }
+
         return null;
     }
 
@@ -157,19 +159,46 @@ class File
     public function top($id)
     {
         if ($this->_mails && isset($this->_mails[$id])) {
-            $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
+            $lines = file($this->_path.'/'.$this->_mails[$id]['file_name']);
+//            $data = file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
 //            preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', $data), $subBoundary);
 //            if (isset($subBoundary[1])) {
 //                $data = preg_split('/'.$subBoundary[1].'[\"\r\n]/si', $data)[0].$subBoundary[1].'"';
 //            } else {
-            //@TODO продумать разделитель, могут быть проблемы из-за этого
-            $data = preg_split('/[\n\r]{3,}/s', $data)[0];
+//            $data = preg_split('/[\n\r]{3,}/s', $data)[0];
 //            }
+            $data = [];
+            $countEmpty = 0;
+            $isName = false;
+            foreach ($lines as $line) {
+                if ($line[0] !== "\t" && $line[0] !== ' ' && preg_match('/^[A-Z]/', $line) && $line[0] !== '-' && strpos($line, ':') !== false) {
+                    $data[] = $line;
+                    $countEmpty = 0;
+                    $isName = true;
+                } elseif (($line[0] === "\t" || $line[0] === ' ') && !empty(trim($line)) && $isName) {
+                    $data[] = $line;
+                    $countEmpty = 0;
+                } elseif (empty(trim($line))) {
+                    $data[] = $line;
+                    $countEmpty++;
+                    $isName = false;
+                } elseif ($line[0] === '-' && $line[1] === '-' && $countEmpty > 0) {
+                    preg_match(Headers::BOUNDARY_PATTERN, str_replace("\r\n\t", ' ', implode($data)), $subBoundary);
+                    if (isset($subBoundary[1]) && strpos($line, $subBoundary[1]) !== false) {
+                        break;
+                    }
+                    $isName = false;
+                } elseif ($countEmpty > 0) {
+                    break;
+                } else {
+                    //опасный момент
+                }
+            }
 
-            return $data;
-        } else {
-            return null;
+            return implode($data);
         }
+
+        return null;
     }
 
     /**
@@ -183,8 +212,8 @@ class File
     {
         if ($this->_mails && isset($this->_mails[$id])) {
             return file_get_contents($this->_path.'/'.$this->_mails[$id]['file_name']);
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

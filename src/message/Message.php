@@ -47,7 +47,7 @@ class Message
     {
         $this->id = $id;
         $this->_header = new Headers($header);
-        $this->_content = mb_substr($message, strlen($header), strlen($message));
+        $this->_content = mb_substr($message, mb_strlen($header), mb_strlen($message));
         $this->_originMessage = $message;
         $this->parserContent($this->_header->getMessageBoundary(), $this->_content);
     }
