@@ -82,6 +82,19 @@ $storage = afinogen89\getmail\storage\Storage::init(
 );
 ```
 
+Подключение к yandex  
+Чтобы корректно заработал скрипт нужно в настройках (Почта - Все настройки - Почтовые программы) поставить галочки "С сервера pop.yandex.ru по протоколу POP3" и "При получении почты по POP3 письма в почтовом ящике Яндекс.Почты помечать как прочитанные".
+```php
+$storage = new \afinogen89\getmail\storage\Pop3(
+    [
+        'host' => 'pop.yandex.ru',
+        'user' => 'test@yandex.ru',
+        'password' => '123456',
+        'ssl' => 'SSL'
+    ]
+);
+```
+
 English version
 -----------
 
