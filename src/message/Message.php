@@ -109,9 +109,9 @@ class Message
                     if ($part->contentType != Content::CT_TEXT_PLAIN && $this->getHeaders()->getMessageContentType() == Content::CT_MULTIPART_ALTERNATIVE) {
                         $body = $part->getContentDecode();
                         break;
-                    } else {
-                        $body .= PHP_EOL.$part->getContentDecode();
                     }
+
+                    $body .= PHP_EOL.$part->getContentDecode();
                 }
             } else {
                 $body = $this->_parts[0]->getContentDecode();
@@ -223,7 +223,7 @@ class Message
         if ($content->contentType == Content::CT_TEXT_HTML || $content->contentType == Content::CT_TEXT_PLAIN) {
             $headers = Headers::toArray($dataContent['header']."\r\n\r\n");
             $data = explode(';', current($headers['content-type']));
-            if (count($data) > 1) {
+            if (count($data) > 1 && strpos($data[1],'charset') !== false) {
                 $content->charset = trim(explode('=', $data[1])[1]);
             } else {
                 $content->charset = $this->getHeaders()->getCharset();
