@@ -80,8 +80,12 @@ class Headers
             $this->_to = $email[0];
         }
 
-        $part = current($headers['content-type']);
-        $this->_messageContentType = trim(explode(';', $part)[0]);
+        if (isset($headers['content-type'])) {
+            $part = current($headers['content-type']);
+            $this->_messageContentType = trim(explode(';', $part)[0]);
+        } else {
+            $this->_messageContentType = Content::CT_TEXT_PLAIN;
+        }
 
         if (preg_match_all('/(boundary|charset)\s*\=\s*["\']?([\w\-\/\=\.]+)/i', $part, $result)) {
             foreach ($result[1] as $key => $val) {
