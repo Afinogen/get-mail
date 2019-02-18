@@ -2,6 +2,8 @@
 
 namespace afinogen89\getmail\message;
 
+use ForceUTF8\Encoding;
+
 /**
  * Class Message
  *
@@ -9,6 +11,7 @@ namespace afinogen89\getmail\message;
  */
 class Message
 {
+    const FILE_PATTERN = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
     /**
      * @var int
      */
@@ -223,7 +226,7 @@ class Message
         if ($content->contentType == Content::CT_TEXT_HTML || $content->contentType == Content::CT_TEXT_PLAIN) {
             $headers = Headers::toArray($dataContent['header']."\r\n\r\n");
             $data = explode(';', current($headers['content-type']));
-            if (count($data) > 1 && strpos($data[1],'charset') !== false) {
+            if (count($data) > 1 && strpos($data[1], 'charset') !== false) {
                 $content->charset = trim(explode('=', $data[1])[1]);
             } else {
                 $content->charset = $this->getHeaders()->getCharset();
@@ -269,47 +272,19 @@ class Message
         $headers = Headers::toArray($part['header']."\r\n");
         $attachment->headers = $headers;
 
-        $pattern = '#name\s*(\*\d+\*)?\s*\=(utf-8|koi8-r)?\s*[\\\'\"]*([^\\\'";]+)#si';
+        $pattern = self::FILE_PATTERN;
         $name = '';
+        $isNotFoundName = false;
         if (isset($headers['content-type'])) {
             $data = explode(';', current($headers['content-type']));
 
             $attachment->contentType = trim($data[0]);
 
-            array_shift($data);
-            if (count($data) == 1) {
-                $name = preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si', '$1', $data[0]);
-            } elseif (count($data) > 1) {
-                foreach ($data as $value) {
-                    if (preg_match($pattern, $value, $res)) {
-                        $name = $res[3];
-                    }
-                }
-            } else {
+            $name = $this->decodeFileName($data);
+            if ($name == null) {
+                $isNotFoundName = true;
                 $name = time();
             }
-
-            $tmpFileName = Headers::decodeMimeString($name);
-            //TODO не очень хорошее решение, если кто предложит лучше, готов рассмотреть
-            // Content-Disposition: attachment; filename*=UTF-8''%D0%B7%D0%B0%D1%8F%D0%B2%D0%BA%D0%B0%20%D0%95%D0%B2%D1%80%D0%BE%D0%94%D0%BE%D0%BD%208%D1%84%D0%B5%D0%B2%D1%802017%2Exls
-            if ($tmpFileName === $name) {
-                $tmp = explode("''", $name);
-                if (count($tmp) > 1) {
-                    $tmpFileName = urldecode($tmp[1]);
-                }
-            }
-
-            $name = $tmpFileName;
-            $encode = mb_detect_encoding(
-                $name, [
-                    'UTF-8',
-                    'Windows-1251'
-                ]
-            );
-            if ($encode && $encode !== 'UTF-8') {
-                $name = mb_convert_encoding($name, 'UTF-8', $encode);
-            }
-
             $attachment->name = $name;
         }
 
@@ -340,12 +315,14 @@ class Message
                 $name = Headers::decodeMimeString($name);
                 $name = urldecode($name);
 
-                if (mb_detect_encoding($name) != 'UTF-8') {
-                    $name = mb_convert_encoding($name, 'UTF-8');
-                }
-
-                $attachment->filename = $name;
+                $attachment->filename = $this->toUtf8($name);
             } else {
+                if ($isNotFoundName) {
+                    $name = $this->decodeFileName($data);
+                    if ($name === null) {
+                        $name = time();
+                    }
+                }
                 $name = trim(preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $name));
                 $attachment->filename = $name;//Headers::decodeMimeString($name);
             }
@@ -365,6 +342,59 @@ class Message
     }
 
     /**
+     * Попытка обнаружить utf-8
+     *
+     * @param string $string
+     *
+     * @return false|int
+     */
+    public function detectUTF8($string)
+    {
+        return preg_match(
+            '%(?:
+        [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
+        |\xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
+        |[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2} # straight 3-byte
+        |\xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
+        |\xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
+        |[\xF1-\xF3][\x80-\xBF]{3}         # planes 4-15
+        |\xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
+        )+%xs',
+            $string
+        );
+    }
+
+    /**
+     * Конвертация в utf-8
+     *
+     * @param $string
+     *
+     * @return false|string|string[]|null
+     */
+    public function toUtf8($string)
+    {
+        $encode = mb_detect_encoding(
+            $string, [
+                'UTF-8',
+                'Windows-1251'
+            ]
+        );
+        if ($encode && $encode !== 'UTF-8') {
+            $string = mb_convert_encoding($string, 'UTF-8', $encode);
+        }
+
+        if (!$this->detectUTF8($string)) {
+            //Скорей всего кодировка не utf-8, пробуем перегнать из 1251
+            $tmpName = mb_convert_encoding($string, 'UTF-8', 'Windows-1251');
+            if ($this->detectUTF8($tmpName)) {
+                $string = $tmpName;
+            }
+        }
+
+        return $string;
+    }
+
+    /**
      * @param string $str
      *
      * @return array
@@ -374,8 +404,41 @@ class Message
         $data = preg_split('/[\r\n]{3,}/si', $str);
 
         return [
-            'header'  => array_shift($data),
+            'header' => array_shift($data),
             'content' => implode("\r\n", $data)
         ];
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return string
+     */
+    protected function decodeFileName($data)
+    {
+        array_shift($data);
+        if (count($data) == 1) {
+            $name = preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si', '$1', $data[0]);
+        } elseif (count($data) > 1) {
+            foreach ($data as $value) {
+                if (preg_match(self::FILE_PATTERN, $value, $res)) {
+                    $name = $res[3];
+                }
+            }
+        } else {
+            return null;
+        }
+
+        $tmpFileName = Headers::decodeMimeString($name);
+        //TODO не очень хорошее решение, если кто предложит лучше, готов рассмотреть
+        // Content-Disposition: attachment; filename*=UTF-8''%D0%B7%D0%B0%D1%8F%D0%B2%D0%BA%D0%B0%20%D0%95%D0%B2%D1%80%D0%BE%D0%94%D0%BE%D0%BD%208%D1%84%D0%B5%D0%B2%D1%802017%2Exls
+        if ($tmpFileName === $name) {
+            $tmp = explode("''", $name);
+            if (count($tmp) > 1) {
+                $tmpFileName = urldecode($tmp[1]);
+            }
+        }
+
+        return $this->toUtf8($tmpFileName);
     }
 }

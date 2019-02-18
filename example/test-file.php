@@ -6,11 +6,12 @@
  * Time: 9:14
  */
 
+ini_set('memory_limit', -1);
 // Composer
-require('../vendor/autoload.php');
+require_once __DIR__.'/../vendor/autoload.php';
 
 
-$storage = new \afinogen89\getmail\storage\File(['path' => '../eml/']);
+$storage = new \afinogen89\getmail\storage\File(['path' => __DIR__.'/../eml/']);
 
 //// Вывод одного письма
 //$msg = $storage->getMessage(1357); 

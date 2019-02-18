@@ -2,4 +2,5 @@
 composer.phar
 composer.lock
 vendor
-eml
+eml/
+eml_2/

@@ -16,26 +16,37 @@ class Headers
 
     /** @var  string */
     private $_headers;
+
     /** @var  string */
     private $_to;
+
     /** @var  string */
     private $_from;
+
     /** @var  string */
     private $_fromName;
+
     /** @var  string */
     private $_cc;
+
     /** @var  string */
     private $_subject;
+
     /** @var  string */
     private $_messageContentType;
+
     /** @var  string */
     private $_boundary;
+
     /** @var  string */
     private $_date;
+
     /** @var  string */
     private $_charset;
+
     /** @var  string */
     private $_transferEncoding;
+
     /** @var  bool */
     private $_isAutoReply;
 
@@ -134,47 +145,106 @@ class Headers
     {
         $items = preg_split('/[\r\n]{2,}/si', $strMime);
         $result = '';
-        foreach ($items as $item) {
+        $strArray = [];
+        $tmpItems = [];
+        foreach ($items as $key => $item) {
+            $commaArray = explode('>,', $item);
+            if (count($commaArray) > 1) {
+                $last = array_pop($commaArray);
+                foreach ($commaArray as $value) {
+                    $tmpItems[] = $value.'>,';
+                }
+                $tmpItems[] = $last;
+            } else {
+                $tmpItems[] = current($commaArray);
+            }
+        }
+        $items = $tmpItems;
+
+        foreach ($items as $key => $item) {
             $data = explode('?', $item);
             $str = '';
             if (!empty($data) && count($data) == 1 && is_null($charset)) {
                 $str = $data[0];
             } elseif (!empty($data)) {
+                $lastItem = '';
                 while (!empty($data)) {
-                    $str .= self::decodeMimeStringPart($data);
+                    $stringPart = self::decodeMimeStringPart($data);
+                    if (count($data) == 1) {
+                        $lastItem = trim(array_shift($data), ' =');
+                    }
+                    if (!empty($stringPart)) {
+                        $strArray = array_merge_recursive($strArray, $stringPart);
+                    }
                 }
+
+                if (count($items) === 1 || !empty($lastItem) || (isset($items[$key + 1]) && strpos(trim($items[$key + 1]), '=?') !== 0)) {
+                    $str .= self::decodeStrArray($strArray);
+                    $strArray = [];
+                }
+
+                $str .= $lastItem;
             }
             $result .= $str;
         }
+        if (!empty($strArray)) {
+            $result .= self::decodeStrArray($strArray);
+        }
 
-        if (!empty($charset)){
+        if (!empty($charset)) {
             $strMime = mb_convert_encoding($strMime, 'UTF-8', $charset);
         }
 
         return $result ?: $strMime;
     }
 
-    public static function decodeMimeStringPart(&$data)
+    /**
+     * @param array $strArray
+     *
+     * @return string
+     */
+    public static function decodeStrArray($strArray)
     {
         $str = '';
-        array_shift($data);
-        $encode = array_shift($data);
-        $type = strtoupper(array_shift($data));
-        if ($type == 'B') {
-            $str = base64_decode(array_shift($data));
-            $str .= trim($data[0], ' =');
-        } elseif ($type == 'Q') {
-            $str = quoted_printable_decode(array_shift($data));
-            if (!empty($data)) {
-                $str .= trim($data[0], ' =');
+        foreach ($strArray as $encode => $part) {
+            $encodedStr = '';
+            foreach ($part as $type => $strings) {
+                if ($type === 'B') {
+                    $resultStr = is_array($strings) ? implode(array_map('base64_decode', $strings)) : base64_decode($strings);
+                } elseif ($type === 'Q') {
+                    $resultStr = is_array($strings) ? implode($strings) : $strings;
+                    $resultStr = quoted_printable_decode($resultStr);
+                }
+                $encodedStr .= $resultStr;
             }
-        }
 
-        if (!empty($encode) && !empty($str)) {
-            $str = mb_convert_encoding($str, 'UTF-8', $encode);
+            $str .= mb_convert_encoding($encodedStr, 'UTF-8', $encode);
         }
 
         return $str;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return array
+     */
+    public static function decodeMimeStringPart(&$data)
+    {
+        array_shift($data);
+        $encode = strtoupper(array_shift($data));
+        $type = strtoupper(array_shift($data));
+        if ($type === '') {
+            return [];
+        }
+
+        $str = array_shift($data);
+
+        return [
+            $encode => [
+                $type => $str
+            ]
+        ];
     }
 
     /**
