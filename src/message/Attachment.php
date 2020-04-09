@@ -54,8 +54,10 @@ class Attachment
     {
         if ($this->transferEncoding == 'base64') {
             return base64_decode($this->data);
-        }elseif ($this->transferEncoding == 'quoted-printable') {
+        } elseif ($this->transferEncoding == 'quoted-printable') {
             return quoted_printable_decode($this->data);
+        } elseif (in_array($this->transferEncoding, ['8bit', '7bit', 'binary'])) {
+            return $this->data;
         } else {
             //TODO возвращать исходный контент?
 //          return $this->data;
