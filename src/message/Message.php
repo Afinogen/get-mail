@@ -324,6 +324,7 @@ class Message
                     }
                 }
                 $name = trim(preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $name));
+                $name = urldecode($name);
                 $attachment->filename = $name;//Headers::decodeMimeString($name);
             }
         }
@@ -417,12 +418,13 @@ class Message
     protected function decodeFileName($data)
     {
         array_shift($data);
+        $name = '';
         if (count($data) == 1) {
             $name = preg_replace('#.*name\s*\=\s*[\'"]([^\'"]+).*#si', '$1', $data[0]);
         } elseif (count($data) > 1) {
             foreach ($data as $value) {
                 if (preg_match(self::FILE_PATTERN, $value, $res)) {
-                    $name = $res[3];
+                    $name .= $res[3];
                 }
             }
         } else {
