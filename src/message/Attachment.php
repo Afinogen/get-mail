@@ -67,10 +67,11 @@ class Attachment
     }
 
     /**
-     * @param string $path
+     * @param $path
+     * @return false|int
      */
     public function saveToFile($path)
     {
-        file_put_contents($path, $this->getData());
+        return file_put_contents($path, $this->getData());
     }
 }
