@@ -57,8 +57,7 @@ class Message
 
     /**
      * @param string $path
-     *
-     * @return int
+     * @return false|int
      */
     public function saveToFile($path)
     {
@@ -326,6 +325,13 @@ class Message
                 $name = trim(preg_replace('/(file)?name\s*(\*\d+\*)?\s*\=/i', '', $name));
                 $name = urldecode($name);
                 $attachment->filename = $name;//Headers::decodeMimeString($name);
+            }
+            //TODO самый простой вариант который смог придумать, нужно будет подумать как сделать лучше.
+            if (preg_match("/(.*?)\.([A-z0-9]+)$/", $attachment->filename, $matches)){
+                $attachment->baseName = $matches[1];
+                $attachment->extension = $matches[2];
+            }else{
+                $attachment->baseName = $attachment->filename;
             }
         }
 

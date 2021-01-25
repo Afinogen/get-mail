@@ -32,6 +32,16 @@ class Attachment
     /**
      * @var string
      */
+    public $baseName;
+
+    /**
+     * @var string|null
+     */
+    public $extension = null;
+
+    /**
+     * @var string
+     */
     public $attachmentId;
 
     /**
@@ -67,7 +77,7 @@ class Attachment
     }
 
     /**
-     * @param $path
+     * @param string $path
      * @return false|int
      */
     public function saveToFile($path)
