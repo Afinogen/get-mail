@@ -326,6 +326,13 @@ class Message
                 $name = urldecode($name);
                 $attachment->filename = $name;//Headers::decodeMimeString($name);
             }
+            //TODO самый простой вариант который смог придумать, нужно будет подумать как сделать лучше.
+            if (preg_match("/(.*?)\.([A-z0-9]+)$/", $attachment->filename, $matches)){
+                $attachment->baseName = $matches[1];
+                $attachment->extension = $matches[2];
+            }else{
+                $attachment->baseName = $attachment->filename;
+            }
         }
 
         if (isset($headers['content-transfer-encoding'])) {

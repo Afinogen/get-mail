@@ -32,6 +32,16 @@ class Attachment
     /**
      * @var string
      */
+    public $baseName;
+
+    /**
+     * @var string|null
+     */
+    public $extension = null;
+
+    /**
+     * @var string
+     */
     public $attachmentId;
 
     /**
