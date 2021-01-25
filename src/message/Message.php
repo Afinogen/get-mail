@@ -57,8 +57,7 @@ class Message
 
     /**
      * @param string $path
-     *
-     * @return int
+     * @return false|int
      */
     public function saveToFile($path)
     {
