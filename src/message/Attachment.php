@@ -67,7 +67,7 @@ class Attachment
     }
 
     /**
-     * @param $path
+     * @param string $path
      * @return false|int
      */
     public function saveToFile($path)
