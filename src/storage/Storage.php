@@ -15,8 +15,9 @@ namespace afinogen89\getmail\storage;
  */
 class Storage
 {
-    const FILE = 'File';
-    const POP3 = 'Pop3';
+    public const FILE = 'File';
+    public const POP3 = 'Pop3';
+    public const IMAP = 'Imap';
 
     /**
      * @param array $config
@@ -25,12 +26,18 @@ class Storage
      */
     public static function init(array $config)
     {
-        if (empty($config['storage']) || ($config['storage'] != self::FILE && $config['storage'] != self::POP3)) {
+        $allowedStorages = [
+            self::FILE,
+            self::IMAP,
+            self::POP3
+        ];
+
+        if (empty($config['storage']) || !in_array($config['storage'], $allowedStorages)) {
             throw new \InvalidArgumentException('need at least type in params');
         }
 
         $className = __NAMESPACE__.'\\'.$config['storage'];
 
-        return new  $className($config);
+        return new $className($config);
     }
 }
